@@ -1,0 +1,107 @@
+﻿<Window
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"             
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:tb="http://www.hardcodet.net/taskbar"
+             mc:Ignorable="d" 
+             x:Class="VRChatFriends.Views.ListWindow" d:DesignHeight="1000" Icon="ThinkingCat.png" Title="VRCFriendWatchdog">
+    <Grid>
+        <StackPanel Margin="10">
+            <Grid>
+                <Button x:Name="reload" Content="Reload" Command="{Binding OnReloadClick}" Height="30" HorizontalAlignment="Right" Width="50" Margin="100,0,0,0" />
+                <Button x:Name="logout" Content="Logout" Command="{Binding OnLogoutClick}" Height="30" HorizontalAlignment="Right" Width="50" Margin="0,0,70,0" />
+                <TextBox x:Name="KeywordBox"
+                        FontSize="20"
+                        TextChanged="KeywordChange"
+                        Text="{Binding FilterKeyword}" Width="200" Margin="-150,0,0,0" HorizontalAlignment="Center"/>
+                <Button x:Name="serch" Content="Search" Command="{Binding OnFilterKeywordChange}" Height="30" HorizontalAlignment="Center" Width="50" Margin="150,0,0,0" />
+                <ComboBox ItemsSource="{Binding SortTypes}"
+                    SelectedValue="{Binding SortFilter}" Width="100" HorizontalAlignment="Left"/>
+            </Grid>
+
+            <Border BorderThickness="10" BorderBrush="Black">
+                <StackPanel Margin="10">
+                    <TextBlock TextWrapping="Wrap" Text="{Binding LogText}" HorizontalAlignment="Center" Height="30" />
+                    <TextBlock TextWrapping="Wrap" Text="{Binding OnlineCount}" HorizontalAlignment="Center" />
+                    <TextBlock TextWrapping="Wrap" Text="{Binding UserCount}" HorizontalAlignment="Center" />
+                    <TextBlock TextWrapping="Wrap" Text="{Binding LocationCount}" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <ListBox x:Name="LocationList"
+                Margin="0,5,0,0"
+                Height="350"
+                SelectionMode="Single"
+                ItemsSource="{Binding FilterdLocationList}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <Button Command="{Binding OnClick}">
+                                    <Border BorderThickness="0.1" BorderBrush="{Binding BGColor}">
+                                        <Image Height="50" Width="50" Source="{Binding ThumbnailURL}"/>
+                                    </Border>
+                                </Button>
+                            </Grid>
+                            <ListBox
+                                Grid.Row="0" 
+                                ItemsSource="{Binding Users}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Button Command="{Binding OnClick}">
+                                                <Border BorderThickness="2" BorderBrush="{Binding BGColor}">
+                                                    <Image Height="50" Width="50" Source="{Binding ThumbnailURL}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                </Border>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                            </ListBox>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <StackPanel Margin="10" Orientation="Horizontal">
+                <Image Height="200" Width="200" Source="{Binding DetailPanel.ThumbnailURL}"/>
+                <StackPanel Margin="10">
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Name}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Id}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Platform}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Status}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Description}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Tags}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Date}"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Histry}"/>
+                    <StackPanel Margin="10" Orientation="Horizontal">
+                        <Button x:Name="Fav" Content="Watch" Command="{Binding DetailPanel.OnClickFavorite}" Height="30"  Width="50" Margin="10,0,0,0" HorizontalAlignment="Left"/>
+                        <Button x:Name="Join" Content="Join" Command="{Binding DetailPanel.OnJoinClick}" Height="30"  Width="50" Margin="30,0,0,0" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+            <ListView 
+                Margin="0,5,0,0"
+                Height="150"
+                SelectionMode="Single"
+                ItemsSource="{Binding DetailPanel.Users}"/>
+            <ListView 
+                Margin="0,5,0,0"
+                Height="150"
+                SelectionMode="Single"
+                ItemsSource="{Binding DetailPanel.HistryDetail}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DetailData}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,42 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="VRChatFriends.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="UserName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="KeyHash" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Password" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ThumbnailURL" Type="(Web Service URL)" Scope="User">
+      <Value Profile="(Default)">https://i.gyazo.com/702d3d58cce90f3fbdbed2fc0b61a75f.png</Value>
+    </Setting>
+    <Setting Name="LogOutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">./Logs</Value>
+    </Setting>
+    <Setting Name="APIUpdateInterval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">15</Value>
+    </Setting>
+    <Setting Name="LogInterval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1800</Value>
+    </Setting>
+    <Setting Name="MaxUserCell" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="FavoriteListPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">./Settings/Favolite.txt</Value>
+    </Setting>
+    <Setting Name="DiscordConfigPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">./Settings/DiscordSettings.txt</Value>
+    </Setting>
+    <Setting Name="FullLog" Type="System.String" Scope="User">
+      <Value Profile="(Default)">disable</Value>
+    </Setting>
+    <Setting Name="NoticeTimer" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

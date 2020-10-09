@@ -1,0 +1,12 @@
+﻿<Window x:Class="VRChatFriends.Views.Login"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/" Height="120" Width="200" Title="PleaseLogin">
+    <Grid>
+        <TextBox x:Name="UserBox" HorizontalAlignment="Right" Height="20" Margin="0,10,5,0" TextWrapping="Wrap" Text="{Binding UserName}" VerticalAlignment="Top" Width="120" />
+        <PasswordBox x:Name="PasswordBox" HorizontalAlignment="Right" Height="20" Margin="0,35,5,0" PasswordChanged="PasswordChanged" VerticalAlignment="Top" Width="120"/>
+        <Button Content="{Binding LogMsg}" Command="{Binding OnClickLogin}" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="170" Margin="0,0,0,5" />
+        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="UserName" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,35,0,0" TextWrapping="Wrap" Text="Password" VerticalAlignment="Top"/>
+    </Grid>
+</Window>
