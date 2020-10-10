@@ -6,8 +6,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:tb="http://www.hardcodet.net/taskbar"
              mc:Ignorable="d" 
+             Closing="ClosingWindow" 
              x:Class="VRChatFriends.Views.ListWindow" d:DesignHeight="1000" Icon="ThinkingCat.png" Title="VRCFriendWatchdog">
     <Grid>
+        <tb:TaskbarIcon IconSource="ThinkingCat.ico" ToolTipText="{Binding logTaskbar}">
+            <tb:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="OpenMenu" Header="Open" Click="OpenApp"/>
+                    <MenuItem x:Name="ExitMenu" Header="Exit" Click="ExitApp"/>
+                </ContextMenu>
+            </tb:TaskbarIcon.ContextMenu>
+        </tb:TaskbarIcon>
         <StackPanel Margin="10">
             <Grid>
                 <Button x:Name="reload" Content="Reload" Command="{Binding OnReloadClick}" Height="30" HorizontalAlignment="Right" Width="50" Margin="100,0,0,0" />

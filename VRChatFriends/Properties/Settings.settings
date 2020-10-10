@@ -32,11 +32,17 @@
     <Setting Name="DiscordConfigPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">./Settings/DiscordSettings.txt</Value>
     </Setting>
+    <Setting Name="NoticeTimer" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="YamiNoData" Type="System.String" Scope="User">
+      <Value Profile="(Default)">disable</Value>
+    </Setting>
     <Setting Name="FullLog" Type="System.String" Scope="User">
       <Value Profile="(Default)">disable</Value>
     </Setting>
-    <Setting Name="NoticeTimer" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">2</Value>
+    <Setting Name="Eula" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -131,10 +131,17 @@ namespace VRChatFriends.Usecase
             var u = log.GetUserLog(id);
             if(u!=null)
             {
-                u.OrderBy(l=> l.Value);
-                foreach (var item in u)
+                var sorted = u.OrderBy(l=> l.Value).ToList();
+                foreach (var item in sorted)
                 {
-                    o.Add(item.Key + " : " + (item.Value+59)/60 + "min");
+                    if(ConfigData.FriendData)
+                    {
+                        o.Add(item.Key + " : " + (item.Value + 59) / 60 + "min");
+                    }
+                    else
+                    {
+                        o.Add(item.Key);
+                    }
                 }
             }
             return o;

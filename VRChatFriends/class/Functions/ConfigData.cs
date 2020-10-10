@@ -23,7 +23,17 @@ namespace VRChatFriends.Function
         }
         public static string PassWord
         {
-            get { return Properties.Settings.Default.Password; }
+            get
+            {
+                if (Eula)
+                {
+                    return Properties.Settings.Default.Password;
+                }
+                else
+                {
+                    return "";
+                }
+            }
             set { Properties.Settings.Default.Password = value; }
         }
         public static string PassWord_Hash
@@ -90,15 +100,25 @@ namespace VRChatFriends.Function
             get { return Properties.Settings.Default.DiscordConfigPath; }
             set { Properties.Settings.Default.DiscordConfigPath = value; }
         }
+        public static int NoticeTimer
+        {
+            get { return Properties.Settings.Default.NoticeTimer; }
+            set { Properties.Settings.Default.NoticeTimer = value; }
+        }
         public static bool FullLog
         {
             get { return Properties.Settings.Default.FullLog == "enable"; }
             set { Properties.Settings.Default.FullLog = value ? "enable" : "disable"; }
         }
-        public static int NoticeTimer
+        public static bool FriendData
         {
-            get { return Properties.Settings.Default.NoticeTimer; }
-            set { Properties.Settings.Default.NoticeTimer = value; }
+            get { return Properties.Settings.Default.YamiNoData == "enable"; }
+            set { Properties.Settings.Default.YamiNoData = value ? "enable" : "disable"; }
+        }
+        public static bool Eula
+        {
+            get { return Properties.Settings.Default.Eula; }
+            set { Properties.Settings.Default.Eula = value; }
         }
     }
 }

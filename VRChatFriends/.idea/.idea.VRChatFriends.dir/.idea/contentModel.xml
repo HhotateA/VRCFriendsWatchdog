@@ -3,8 +3,8 @@
   <component name="ContentModelStore">
     <e p="C:\Users\HhotateA\AppData\Local\JetBrains\Rider2020.2\extResources" t="IncludeRecursive" />
     <e p="C:\Users\HhotateA\AppData\Local\JetBrains\Rider2020.2\resharper-host\Local\Transient\Rider\v202\SolutionCaches\_.19.00" t="ExcludeRecursive" />
-    <e p="C:\Users\HhotateA\source\repos\VRChatFriends\.editorconfig" t="Include" />
-    <e p="C:\Users\HhotateA\source\repos\VRChatFriends\VRChatFriends" t="IncludeRecursive">
+    <e p="C:\Users\HhotateA\source\repos\VRCFriendWatchdog\.editorconfig" t="Include" />
+    <e p="C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends" t="IncludeRecursive">
       <e p="App.config" t="Include" />
       <e p="App.xaml" t="Include" />
       <e p="App.xaml.cs" t="Include" />

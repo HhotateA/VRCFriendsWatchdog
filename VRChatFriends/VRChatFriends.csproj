@@ -38,7 +38,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -180,10 +180,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="class\Views\ThinkingCat.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Resource Include="class\Views\ThinkingCat.png" />
+    <Resource Include="class\Views\ThinkingCat.ico" />
     <Content Include="dll\netstandard2.0\VRChatApi.dll" />
     <Content Include="dll\netstandard2.0\VRChatApi.pdb" />
   </ItemGroup>

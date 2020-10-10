@@ -18,7 +18,6 @@ namespace VRChatFriends.Views
         {
             InitializeComponent();
         }
-        /*
         private void ClosingWindow(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
@@ -33,7 +32,6 @@ namespace VRChatFriends.Views
             this.Close();
             AppShutdown?.Invoke();
         }
-        */
         public Action AppShutdown { get; set; }
         private void KeywordChange(object sender, RoutedEventArgs e)
         {

@@ -146,6 +146,30 @@ namespace VRChatFriends.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int NoticeTimer {
+            get {
+                return ((int)(this["NoticeTimer"]));
+            }
+            set {
+                this["NoticeTimer"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("disable")]
+        public string YamiNoData {
+            get {
+                return ((string)(this["YamiNoData"]));
+            }
+            set {
+                this["YamiNoData"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("disable")]
         public string FullLog {
             get {
@@ -158,13 +182,13 @@ namespace VRChatFriends.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2")]
-        public int NoticeTimer {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Eula {
             get {
-                return ((int)(this["NoticeTimer"]));
+                return ((bool)(this["Eula"]));
             }
             set {
-                this["NoticeTimer"] = value;
+                this["Eula"] = value;
             }
         }
     }
