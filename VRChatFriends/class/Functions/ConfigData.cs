@@ -19,7 +19,11 @@ namespace VRChatFriends.Function
         public static string UserName
         {
             get { return Properties.Settings.Default.UserName; }
-            set { Properties.Settings.Default.UserName = value; }
+            set
+            {
+                Properties.Settings.Default.UserName = value;
+                Properties.Settings.Default.Save();
+            }
         }
         public static string PassWord
         {
@@ -34,7 +38,11 @@ namespace VRChatFriends.Function
                     return "";
                 }
             }
-            set { Properties.Settings.Default.Password = value; }
+            set 
+            { 
+                Properties.Settings.Default.Password = value;
+                Properties.Settings.Default.Save();
+            }
         }
         public static string PassWord_Hash
         {

@@ -46,12 +46,12 @@ namespace VRChatFriends.ViewModels
             // watchdog.OnLostUser += OnLostUser;
             watchdog.OnLogout += OpenLoginDialog;
             isReloading = true;
-            watchdog.InitializeUserList(() =>
+            watchdog.OnUpdateFinish += ListFilterUpdate;
+            await watchdog.InitializeUserList(() =>
             {
                 isReloading = false;
                 watchdog.StartWatchdog();
-            });
-            watchdog.OnUpdateFinish += ListFilterUpdate;
+            }).ConfigureAwait(false);
             OnReloadClick = new DelegateCommand(() =>
             {
                 if (isReloading == false)
@@ -118,8 +118,8 @@ namespace VRChatFriends.ViewModels
 
         void CountUser(ObservableCollection<LocationList> locations)
         {
-            UserCount = "Get : " + locations.SelectMany(l => l.Users).Count();
-            OnlineCount = "Online : " + locations.Where(l => l.Location.Id != "offline").SelectMany(l => l.Users).Count();
+            UserCount = "Get : " + locations.Sum(l => l.Users.Count);
+            OnlineCount = "Online : " + locations.Where(l => l.Location.Id != "offline").Sum(l => l.Users.Count);
             LocationCount = "Location : " + locations.Count;
         }
         string onlineCount;
@@ -378,8 +378,13 @@ namespace VRChatFriends.ViewModels
                             clone[i].SortNumber = int.MaxValue / 2;
                         }
                     }
-                    clone = clone.Where(l => l.Users.Count != 0).ToList();
-                    clone.ForEach(l => l.SortNumber += l.Users?.Max(u => u.TimeStamp) ?? int.MaxValue / 2);
+                    // clone = clone.Where(l => l.Users.Count != 0).ToList();
+                    for(int j=0;j<clone.Count;j++)
+                    {
+                        clone[j].SortNumber = clone[j].Users.Count == 0 ?
+                            int.MaxValue / 2 :
+                            clone[j].Users.Max(l => l.TimeStamp);
+                    }
                 }
 
                 switch (sort)
@@ -440,13 +445,13 @@ namespace VRChatFriends.ViewModels
                         }
                 }
 
-                foreach (var l in clone)
+                for(int i = 0;i<clone.Count;i++)
                 {
-                    if (l.Users.Count > ConfigData.MaxUserCell)
+                    if (clone[i].Users.Count > ConfigData.MaxUserCell)
                     {
-                        var u = l.Users.ToList();
+                        var u = clone[i].Users.ToList();
                         u.RemoveRange(ConfigData.MaxUserCell, u.Count - ConfigData.MaxUserCell);
-                        l.Users = new ObservableCollection<UserList>(u);
+                        clone[i].Users = new ObservableCollection<UserList>(u);
                     }
                 }
                 return new ObservableCollection<LocationList>(clone.OrderBy(l => l.SortNumber));

@@ -86,7 +86,7 @@ namespace VRChatFriends.Usecase
         public Action OnLogout { get; set; }
         long lastUpdate = 0;
         int deltaTime = 0;
-        public void InitializeUserList(Action onFinish = null)
+        public async Task InitializeUserList(Action onFinish = null)
         {
             lastUpdate = Functions.TimeStamp;
             deltaTime = (int)(Functions.TimeStamp - lastUpdate);
@@ -101,7 +101,7 @@ namespace VRChatFriends.Usecase
              }
             );
         }
-        public void UpdateUserList(Action onFinish = null)
+        public async Task UpdateUserList(Action onFinish = null)
         {
             api.GetOnlineFriend(user =>
             {
@@ -118,7 +118,7 @@ namespace VRChatFriends.Usecase
                 });
             });
         }
-        public void UserDetail(string id,Action<UserData> result)
+        public async Task UserDetail(string id,Action<UserData> result)
         {
             api.GetUserData(id,result);
         }
@@ -153,15 +153,15 @@ namespace VRChatFriends.Usecase
             if(u!=null)
             {
                 var sorted = u.OrderBy(l=> -l.Value).ToList();
-                foreach (var item in sorted)
+                for(int i=0;i<sorted.Count;i++)
                 {
                     if(ConfigData.FriendData)
                     {
-                        o.Add(item.Key + " : " + (item.Value + 59) / 60 + "min");
+                        o.Add(sorted[i].Key + " : " + (sorted[i].Value + 59) / 60 + "min");
                     }
                     else
                     {
-                        o.Add(item.Key);
+                        o.Add(sorted[i].Key);
                     }
                 }
             }

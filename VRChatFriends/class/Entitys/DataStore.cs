@@ -73,21 +73,28 @@ namespace VRChatFriends.Entity
         public async Task UpdateOfflineUser(List<UserData> onlineUser, Action<List<UserData>, List<LocationData>> result = null)
         {
             Debug.Log("Update Offline User");
-            await Task.Run(() =>
+            var keys = UserDataList.Keys.ToArray();
+            var values = UserDataList.Values.ToArray();
+            for (int i = 0; i<UserDataList.Count;i++)
             {
-                for(int i = 0; i<UserDataList.Count;i++)
+                UserData a = null;
+                for(int j=0;j<onlineUser.Count;j++)
                 {
-                    var a = onlineUser.FirstOrDefault(l => l.Id == UserDataList.ElementAt(i).Key);
-                    if(a==null)
+                    if(onlineUser[j].Id == keys[i])
                     {
-                        var u = UserDataList.ElementAt(i).Value;
-                        if (u.Location != "offline")
-                        {
-                            OnLostUser?.Invoke(u);
-                        }
+                        a = onlineUser[j];
+                        break;
                     }
                 }
-            }).ConfigureAwait(false);
+                if(a==null)
+                {
+                    var u = values[i];
+                    if (u.Location != "offline")
+                    {
+                        OnLostUser?.Invoke(u);
+                    }
+                }
+            }
             result?.Invoke(
                 UserDataList.Select(l => l.Value).ToList(),
                 LocationDataList.Select(l => l.Value).ToList());

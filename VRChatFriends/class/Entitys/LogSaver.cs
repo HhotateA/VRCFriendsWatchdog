@@ -43,112 +43,149 @@ namespace VRChatFriends.Entity
             }
             SaveFullLog();
         }
-        async public void LogUsers(List<LocationData> locations,int countUp=1)
+        public async Task LogUsers(List<LocationData> locations,int countUp=1)
         {
-            await Task.Run(() =>
+            if (savedUsers==null)
             {
-                if (savedUsers==null)
+                Debug.Log("Create Log ...");
+                savedUsers = new UsersSaveData();
+            }
+            Debug.Log("Write Log ...");
+            for(int i=0;i<locations.Count;i++)
+            {
+                for(int j=0;j<locations[i].Users.Count;j++)
                 {
-                    Debug.Log("Create Log ...");
-                    savedUsers = new UsersSaveData();
-                }
-                Debug.Log("Write Log ...");
-                foreach (var location in locations)
-                {
-                    foreach (var user in location.Users)
+                    UserSaveData u = null;
+                    for (int k = 0; k < savedUsers.users.Count; k++)
                     {
-                        var u = savedUsers.users.FirstOrDefault(l => l.id == user.Id);
+                        if (savedUsers.users[k].id == locations[i].Users[j].Id)
+                        {
+                            u = savedUsers.users[k];
+                            break;
+                        }
+                    }
+                    if (u == null)
+                    {
+                        u = new UserSaveData();
+                        u.id = locations[i].Users[j].Id;
+                        u.name = locations[i].Users[j].Name;
+                        u.lastUpdate = Functions.DateString;
+                        u.friends = new List<FriendUserSaveData>();
+                        u.footprint = new WeeksFootprint();
+                        savedUsers.users.Add(u);
+                    }
+                    // 時間ごとのログイン履歴を記録
+                    u.footprint.CountupFootorint(
+                        Functions.WeekInt(),Functions.HourInt(),
+                        locations[i].Status,countUp);
+                }
+                if (locations[i].Id == "offline")
+                {
+                    // continue;
+                }
+                else
+                if (locations[i].Id == "private")
+                {
+                    // プラべの場合自分だけ加算
+                    for (int j = 0; j < locations[i].Users.Count; j++)
+                    {
+                        UserSaveData u = null;
+                        for (int k = 0; k < savedUsers.users.Count; k++)
+                        {
+                            if (savedUsers.users[k].id == locations[i].Users[j].Id)
+                            {
+                                u = savedUsers.users[k];
+                                break;
+                            }
+                        }
                         if (u == null)
                         {
                             u = new UserSaveData();
-                            u.id = user.Id;
-                            u.name = user.Name;
+                            u.id = locations[i].Users[j].Id;
+                            u.name = locations[i].Users[j].Name;
                             u.lastUpdate = Functions.DateString;
                             u.friends = new List<FriendUserSaveData>();
-                            u.footprint = new WeeksFootprint();
                             savedUsers.users.Add(u);
                         }
-                        // 時間ごとのログイン履歴を記録
-                        u.footprint.CountupFootorint(
-                            Functions.WeekInt(),Functions.HourInt(),
-                            location.Status,countUp);
-                    }
-                    if (location.Id == "offline")
-                    {
-                        // continue;
-                    }
-                    else
-                    if (location.Id == "private")
-                    {
-                        // プラべの場合自分だけ加算
-                        foreach (var user in location.Users)
                         {
-                            var u = savedUsers.users.FirstOrDefault(l => l.id == user.Id);
-                            if (u == null)
+                            var friend = locations[i].Users[j];
+                            FriendUserSaveData f = null;
+                            for (int m = 0; m < u.friends.Count; m++)
                             {
-                                u = new UserSaveData();
-                                u.id = user.Id;
-                                u.name = user.Name;
-                                u.lastUpdate = Functions.DateString;
-                                u.friends = new List<FriendUserSaveData>();
-                                savedUsers.users.Add(u);
-                            }
-                            {
-                                var friend = user;
-                                var f = u.friends.FirstOrDefault(l => l.id == friend.Id);
-                                if (f == null)
+                                if (u.friends[m].id == friend.Id)
                                 {
-                                    f = new FriendUserSaveData();
-                                    f.id = friend.Id;
-                                    f.name = friend.Name;
-                                    f.lastUpdate = Functions.DateString;
-                                    f.count = 0;
-                                    u.friends.Add(f);
+                                    f = u.friends[m];
+                                    break;
                                 }
-                                f.count += countUp;
                             }
-                        }
-                    }
-                    else
-                    {
-                        // インスタンスないの全員を加算
-                        foreach (var user in location.Users)
-                        {
-                            var u = savedUsers.users.FirstOrDefault(l => l.id == user.Id);
-                            if (u == null)
+                            if (f == null)
                             {
-                                u = new UserSaveData();
-                                u.id = user.Id;
-                                u.name = user.Name;
-                                u.lastUpdate = Functions.DateString;
-                                u.friends = new List<FriendUserSaveData>();
-                                savedUsers.users.Add(u);
+                                f = new FriendUserSaveData();
+                                f.id = friend.Id;
+                                f.name = friend.Name;
+                                f.lastUpdate = Functions.DateString;
+                                f.count = 0;
+                                u.friends.Add(f);
                             }
-                            foreach (var friend in location.Users)
-                            {
-                                var f = u.friends.FirstOrDefault(l => l.id == friend.Id);
-                                if (f == null)
-                                {
-                                    f = new FriendUserSaveData();
-                                    f.id = friend.Id;
-                                    f.name = friend.Name;
-                                    f.lastUpdate = Functions.DateString;
-                                    f.count = 0;
-                                    u.friends.Add(f);
-                                }
-                                f.count += countUp;
-                            }
-                            // ロケーションデータ側にも記録
-                            if (!location.UserHistry.ContainsKey(user.Id))
-                            {
-                                location.UserHistry.Add(user.Id,new UserFootprints(user.Name,user.Id));
-                            }
-                            location.UserHistry[user.Id].Count += countUp;
+                            f.count += countUp;
                         }
                     }
                 }
-                SaveLog();
-            }).ConfigureAwait(false);
+                else
+                {
+                    // インスタンスないの全員を加算
+                    for (int j = 0; j < locations[i].Users.Count; j++)
+                    {
+                        UserSaveData u = null;
+                        for (int k = 0; k < savedUsers.users.Count; k++)
+                        {
+                            if (savedUsers.users[k].id == locations[i].Users[j].Id)
+                            {
+                                u = savedUsers.users[k];
+                                break;
+                            }
+                        }
+                        if (u == null)
+                        {
+                            u = new UserSaveData();
+                            u.id = locations[i].Users[j].Id;
+                            u.name = locations[i].Users[j].Name;
+                            u.lastUpdate = Functions.DateString;
+                            u.friends = new List<FriendUserSaveData>();
+                            savedUsers.users.Add(u);
+                        }
+                        for (int k = 0; k < locations[i].Users.Count; k++)
+                        {
+                            FriendUserSaveData f = null;
+                            for (int m = 0; m < u.friends.Count; m++)
+                            {
+                                if (u.friends[m].id == locations[i].Users[j].Id)
+                                {
+                                    f = u.friends[m];
+                                    break;
+                                }
+                            }
+                            if (f == null)
+                            {
+                                f = new FriendUserSaveData();
+                                f.id = locations[i].Users[k].Id;
+                                f.name = locations[i].Users[k].Name;
+                                f.lastUpdate = Functions.DateString;
+                                f.count = 0;
+                                u.friends.Add(f);
+                            }
+                            f.count += countUp;
+                        }
+                        // ロケーションデータ側にも記録
+                        if (!locations[i].UserHistry.ContainsKey(locations[i].Users[j].Id))
+                        {
+                            locations[i].UserHistry.Add(locations[i].Users[j].Id,new UserFootprints(locations[i].Users[j].Name, locations[i].Users[j].Id));
+                        }
+                        locations[i].UserHistry[locations[i].Users[j].Id].Count += countUp;
+                    }
+                }
+            }
+            SaveLog();
         }
         public async Task LoadLog()
         {

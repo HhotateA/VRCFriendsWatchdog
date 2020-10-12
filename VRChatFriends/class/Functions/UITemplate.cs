@@ -282,9 +282,9 @@ namespace VRChatFriends.Function
                 Users = new ObservableCollection<string>();
                 if(data.Id != "private" && data.Id != "offline")
                 {
-                    foreach (var value in data.Users)
+                    for(int i=0;i<data.Users.Count;i++)
                     {
-                        Users.Add(value.Name);
+                        Users.Add(data.Users[i].Name);
                     }
                     HistryDetail = new ObservableCollection<string>(data.UserHistry.Select(l=>l.Value.DetailData));
                 }

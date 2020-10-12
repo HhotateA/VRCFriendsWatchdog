@@ -119,7 +119,6 @@ namespace VRChatFriends.Function
             var s = path.Split('/');
             if(s.Length==1)
             {
-                basePath = "./";
                 fileName = s[0];
             }
             else
@@ -167,7 +166,7 @@ namespace VRChatFriends.Function
                 string t = "";
                 for (int i = 0; i < logs.Length; i++)
                 {
-                    t += logs[i] + Environment.NewLine;
+                    t += Functions.TimeString + " : " + logs[i] + Environment.NewLine;
                 }
                 return t;
             }

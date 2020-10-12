@@ -61,20 +61,27 @@ namespace VRChatFriends.Entity
 
         public async void LoginCheck(Action onSuccess = null,Action onFailure = null)
         {
-            var response = await api.UserApi.Login().ConfigureAwait(false);
-            if (response==null)
+            try
             {
-                Debug.Log("Login failed");
-                LoginUserId = "";
-                isLoginSuccess = false;
-                onFailure?.Invoke();
+                var response = await api.UserApi.Login();
+                if (response == null)
+                {
+                    Debug.Log("Login failed");
+                    LoginUserId = "";
+                    isLoginSuccess = false;
+                    onFailure?.Invoke();
+                }
+                else
+                {
+                    Debug.Log("Login Success");
+                    LoginUserId = response.id;
+                    isLoginSuccess = true;
+                    onSuccess?.Invoke();
+                }
             }
-            else
+            catch
             {
-                Debug.Log("Login Success");
-                LoginUserId = response.id;
-                isLoginSuccess = true;
-                onSuccess?.Invoke();
+                Debug.Log(">>>APIError");
             }
         }
 
@@ -97,9 +104,9 @@ namespace VRChatFriends.Entity
             )
         {
             Debug.Log("Get Online Friends");
-            await GetFriends(result, true).ConfigureAwait(false);
+            GetFriends(result, true).ConfigureAwait(false);
             Debug.Log("Get Offline Friends");
-            await GetFriends(result, false).ConfigureAwait(false);
+            GetFriends(result, false).ConfigureAwait(false);
             Debug.Log("Geted All Friends");
             onFinish?.Invoke();
         }
@@ -109,10 +116,10 @@ namespace VRChatFriends.Entity
             Action<List<UserData>> onFinish = null)
         {
             Debug.Log("Get Online Friends");
-            await GetFriends(result, true, (users)=> 
+            GetFriends(result, true, (users)=> 
             {
                 onFinish?.Invoke(users);
-            }).ConfigureAwait(false);
+            });
         }
 
 
@@ -133,41 +140,49 @@ namespace VRChatFriends.Entity
             int timeoutCount = 15;
             while (true)
             {
-                var response = await api.FriendsApi.Get(i * 100, 100, !online).ConfigureAwait(false);
+                try
+                {
+                    var response = await api.FriendsApi.Get(i * 100, 100, !online).ConfigureAwait(false);
 
-                if(response == null)
-                {
-                    OnNullResponce();
-                    break;
-                }
-
-                foreach (var value in response)
-                {
-                    var o = new UserData(value.id);
-                    o.Name = value.displayName;
-                    o.ThumbnailURL = value.currentAvatarThumbnailImageUrl;
-                    o.Location = value.location;
-                    o.UserName = value.username;
-                    o.Platform = value.last_platform;
-                    o.Status = value.status;
-                    o.StatusDescription = value.statusDescription;
-                    foreach(var v in value.tags)
+                    if(response == null)
                     {
-                        o.Tag += v;
-                    }
-                    output.Add(o);
-                    result?.Invoke(o);
-                }
-                if (response.Count < 100)
-                {
-                    timeoutCount--;
-                    if(timeoutCount<0)
-                    {
+                        OnNullResponce();
                         break;
                     }
-                    await Task.Delay(300).ConfigureAwait(false);
+
+                    for(int r=0;r<response.Count;r++)
+                    {
+                        var value = response[r];
+                        var o = new UserData(value.id);
+                        o.Name = value.displayName;
+                        o.ThumbnailURL = value.currentAvatarThumbnailImageUrl;
+                        o.Location = value.location;
+                        o.UserName = value.username;
+                        o.Platform = value.last_platform;
+                        o.Status = value.status;
+                        o.StatusDescription = value.statusDescription;
+                        foreach(var v in value.tags)
+                        {
+                            o.Tag += v;
+                        }
+                        output.Add(o);
+                        result?.Invoke(o);
+                    }
+                    if (response.Count < 100)
+                    {
+                        timeoutCount--;
+                        if(timeoutCount<0)
+                        {
+                            break;
+                        }
+                        await Task.Delay(300).ConfigureAwait(false);
+                    }
+                    i++;
                 }
-                i++;
+                catch
+                {
+                    Debug.Log(">>>APIError");
+                }
             }
             Debug.Log("API Finish");
             onFinish?.Invoke(output);
@@ -181,66 +196,88 @@ namespace VRChatFriends.Entity
         public async Task GetUserData(string id,Action<UserData> result)
         {
             var o = new UserData(id);
-            var response = await api.UserApi.GetById(o.Id).ConfigureAwait(false);
-            if (response == null)
+            try
             {
-                OnNullResponce();
-                return;
+                var response = await api.UserApi.GetById(o.Id).ConfigureAwait(false);
+                if (response == null)
+                {
+                    OnNullResponce();
+                    return;
+                }
+                o.Name = response.displayName;
+                o.ThumbnailURL = response.currentAvatarThumbnailImageUrl;
+                o.Location = response.location;
+                o.UserName = response.username;
+                o.Platform = response.last_platform;
+                o.Status = response.status;
+                o.StatusDescription = response.statusDescription;
+                foreach (var v in response.tags)
+                {
+                    o.Tag += v;
+                }
             }
-            o.Name = response.displayName;
-            o.ThumbnailURL = response.currentAvatarThumbnailImageUrl;
-            o.Location = response.location;
-            o.UserName = response.username;
-            o.Platform = response.last_platform;
-            o.Status = response.status;
-            o.StatusDescription = response.statusDescription;
-            foreach (var v in response.tags)
+            catch
             {
-                o.Tag += v;
+                Debug.Log(">>>APIError");
             }
             result?.Invoke(o);
         }
         public async Task GetLoginUser(Action<UserData> result)
         {
-            var response = await api.UserApi.Login().ConfigureAwait(false);
-            if (response == null)
+            try
             {
-                OnNullResponce();
-                return;
+                var response = await api.UserApi.Login().ConfigureAwait(false);
+                if (response == null)
+                {
+                    OnNullResponce();
+                    return;
+                }
+                var o = new UserData(response.id);
+                o.Name = response.displayName;
+                o.ThumbnailURL = response.currentAvatarThumbnailImageUrl;
+                o.Location = response.location;
+                Debug.Log(o.Location+"Login");
+                o.UserName = response.username;
+                o.Platform = response.last_platform;
+                o.Status = response.status;
+                o.StatusDescription = response.statusDescription;
+                foreach (var v in response.tags)
+                {
+                    o.Tag += v;
+                }
+                result?.Invoke(o);
             }
-            var o = new UserData(response.id);
-            o.Name = response.displayName;
-            o.ThumbnailURL = response.currentAvatarThumbnailImageUrl;
-            o.Location = response.location;
-            Debug.Log(o.Location+"aaaaaaaaaaaa");
-            o.UserName = response.username;
-            o.Platform = response.last_platform;
-            o.Status = response.status;
-            o.StatusDescription = response.statusDescription;
-            foreach (var v in response.tags)
+            catch
             {
-                o.Tag += v;
+                Debug.Log(">>>APIError");
             }
-            result?.Invoke(o);
         }
         public async Task GetWorldData(string id,Action<LocationData> result)
         {
             var o = new LocationData(id);
-            var response = await api.WorldApi.Get(o.WorldID).ConfigureAwait(false);
-            if (response == null)
+            try
             {
-                OnNullResponce();
-                return;
+                var response = await api.WorldApi.Get(o.WorldID).ConfigureAwait(false);
+                if (response == null)
+                {
+                    OnNullResponce();
+                    return;
+                }
+                o.Tag = "";
+                response.tags.ForEach(l => o.Tag += l + " , ");
+                o.Name = response.name;
+                o.ThumbnailURL = response.thumbnailImageUrl;
             }
-            o.Tag = "";
-            response.tags.ForEach(l => o.Tag += l + " , ");
-            o.Name = response.name;
-            o.ThumbnailURL = response.thumbnailImageUrl;
+            catch
+            {
+                Debug.Log(">>>APIError");
+            }
             result?.Invoke(o);
         }
 
         public async Task GetFavorite(Action<string> result,Action onFinish = null)
         {
+            try
             {
                 var response = await api.FavouriteApi.GetFavourites("friend").ConfigureAwait(false);
                 if (response == null)
@@ -253,18 +290,29 @@ namespace VRChatFriends.Entity
                     result?.Invoke(item.favoriteId);
                 }
             }
-            for(int i=1;i<=3;i++)
+            catch
             {
-                var response = await api.FavouriteApi.GetFavouriteUsers("group_"+i).ConfigureAwait(false);
-                if (response == null)
+                Debug.Log(">>>APIError");
+            }
+            try
+            {
+                for (int i = 1; i <= 3; i++)
                 {
-                    OnNullResponce();
-                    return;
+                    var response = await api.FavouriteApi.GetFavouriteUsers("group_" + i).ConfigureAwait(false);
+                    if (response == null)
+                    {
+                        OnNullResponce();
+                        return;
+                    }
+                    foreach (var item in response)
+                    {
+                        result?.Invoke(item.id);
+                    }
                 }
-                foreach (var item in response)
-                {
-                    result?.Invoke(item.id);
-                }
+            }
+            catch
+            {
+                Debug.Log(">>>APIError");
             }
             onFinish?.Invoke();
         }
