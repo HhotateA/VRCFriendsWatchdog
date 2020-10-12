@@ -38,7 +38,7 @@ namespace VRChatFriends.Usecase
         {
             await Task.Run(() =>
             {
-                Console.WriteLine("Load Favorite File");
+                Debug.Log("Load Favorite File");
                 string filePath = Functions.FileCheck(ConfigData.FavoriteListPath);
                 using (StreamReader sr = new StreamReader(
                     filePath,
@@ -62,7 +62,7 @@ namespace VRChatFriends.Usecase
         {
             await Task.Run(() =>
             {
-                Console.WriteLine("Save Favorite File");
+                Debug.Log("Save Favorite File");
                 string filePath = Functions.FileCheck(ConfigData.FavoriteListPath);
                 var s = new SavedFavoriteList();
                 s.users = LocalFavoriteUsers;

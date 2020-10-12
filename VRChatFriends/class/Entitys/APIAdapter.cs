@@ -55,21 +55,24 @@ namespace VRChatFriends.Entity
             api = new VRChatApi.VRChatApi(id, password);
             return this;
         }
+        public string LoginUserId { get; set; } = "";
 
         bool isLoginSuccess = false;
 
         public async void LoginCheck(Action onSuccess = null,Action onFailure = null)
         {
-            var response = await api.FriendsApi.Get(0,1).ConfigureAwait(false);
-            if(response==null)
+            var response = await api.UserApi.Login().ConfigureAwait(false);
+            if (response==null)
             {
-                Console.WriteLine("Login failed");
+                Debug.Log("Login failed");
+                LoginUserId = "";
                 isLoginSuccess = false;
                 onFailure?.Invoke();
             }
             else
             {
-                Console.WriteLine("Login Success");
+                Debug.Log("Login Success");
+                LoginUserId = response.id;
                 isLoginSuccess = true;
                 onSuccess?.Invoke();
             }
@@ -77,7 +80,7 @@ namespace VRChatFriends.Entity
 
         void OnNullResponce()
         {
-            Console.WriteLine("Null Response Error");
+            Debug.Log("Null Response Error");
             isLoginSuccess = false;
             OnLogout?.Invoke();
         }
@@ -93,13 +96,25 @@ namespace VRChatFriends.Entity
             Action onFinish = null
             )
         {
-            Console.WriteLine("Get Online Friends");
-            await GetOnlineFriends(result, true).ConfigureAwait(false);
-            Console.WriteLine("Get Offline Friends");
-            await GetOnlineFriends(result, false).ConfigureAwait(false);
-            Console.WriteLine("Geted All Friends");
+            Debug.Log("Get Online Friends");
+            await GetFriends(result, true).ConfigureAwait(false);
+            Debug.Log("Get Offline Friends");
+            await GetFriends(result, false).ConfigureAwait(false);
+            Debug.Log("Geted All Friends");
             onFinish?.Invoke();
         }
+
+        public async Task GetOnlineFriend(
+            Action<UserData> result = null,
+            Action<List<UserData>> onFinish = null)
+        {
+            Debug.Log("Get Online Friends");
+            await GetFriends(result, true, (users)=> 
+            {
+                onFinish?.Invoke(users);
+            }).ConfigureAwait(false);
+        }
+
 
         /// <summary>
         /// APIにアクセスし，オンラインのフレンド一覧を取得する
@@ -107,7 +122,7 @@ namespace VRChatFriends.Entity
         /// <param name="result"></param>
         /// <param name="online">falseにするとオフライン取得</param>
         /// <param name="onFinish"></param>
-        public async Task GetOnlineFriends(
+        public async Task GetFriends(
             Action<UserData> result = null,
             bool online = true,
             Action<List<UserData>> onFinish = null
@@ -154,7 +169,7 @@ namespace VRChatFriends.Entity
                 }
                 i++;
             }
-            Console.WriteLine("API Finish");
+            Debug.Log("API Finish");
             onFinish?.Invoke(output);
         }
 
@@ -185,7 +200,29 @@ namespace VRChatFriends.Entity
             }
             result?.Invoke(o);
         }
-
+        public async Task GetLoginUser(Action<UserData> result)
+        {
+            var response = await api.UserApi.Login().ConfigureAwait(false);
+            if (response == null)
+            {
+                OnNullResponce();
+                return;
+            }
+            var o = new UserData(response.id);
+            o.Name = response.displayName;
+            o.ThumbnailURL = response.currentAvatarThumbnailImageUrl;
+            o.Location = response.location;
+            Debug.Log(o.Location+"aaaaaaaaaaaa");
+            o.UserName = response.username;
+            o.Platform = response.last_platform;
+            o.Status = response.status;
+            o.StatusDescription = response.statusDescription;
+            foreach (var v in response.tags)
+            {
+                o.Tag += v;
+            }
+            result?.Invoke(o);
+        }
         public async Task GetWorldData(string id,Action<LocationData> result)
         {
             var o = new LocationData(id);

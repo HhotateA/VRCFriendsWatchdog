@@ -59,6 +59,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Bild|AnyCPU'">
     <OutputPath>bin\Bild1011\</OutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '1011|AnyCPU'">
+    <OutputPath>bin\1011\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
     <Reference Include="System" />

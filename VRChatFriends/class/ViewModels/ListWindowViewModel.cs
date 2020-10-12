@@ -36,6 +36,10 @@ namespace VRChatFriends.ViewModels
             notification = new NotificationManager();
             favoriteList = new FavoriteList(false);
             watchdog = new Watchdog();
+            Debug.OnCatchLog += (l) =>
+            {
+                Logs = l;
+            };
             await favoriteList.InitializeFavoriteList().ConfigureAwait(false);
             watchdog.OnAddUser += OnAddUser;
             watchdog.OnUpdateLocation += OnUpdateLocation;
@@ -47,6 +51,7 @@ namespace VRChatFriends.ViewModels
                 isReloading = false;
                 watchdog.StartWatchdog();
             });
+            watchdog.OnUpdateFinish += ListFilterUpdate;
             OnReloadClick = new DelegateCommand(() =>
             {
                 if (isReloading == false)
@@ -65,12 +70,20 @@ namespace VRChatFriends.ViewModels
         }
         public Action OpenLoginDialog { get;set; }
 
+        string logs;
+        public string Logs
+        {
+            get => logs;
+            set => SetProperty(ref logs, value);
+        }
+
         public enum SortType
         {
             Timeline,
             Hot,
             Favorite,
             Sesrch,
+            None,
         }
         public List<SortType> SortTypes { get; } = new List<SortType>((SortType[])Enum.GetValues(typeof(SortType)));
         SortType sortFilter = SortType.Hot;
@@ -83,6 +96,7 @@ namespace VRChatFriends.ViewModels
                 ListFilterUpdate();
             }
         }
+
         public void ListFilterUpdate()
         {
             FilterdLocationList = ListFilterilter(locations, SortFilter);
@@ -208,9 +222,11 @@ namespace VRChatFriends.ViewModels
                 if (locationPanel == null)
                 {
                     locationPanel = new LocationList(location);
+                    Debug.Log("Initialize Location : " + location.Id);
                     locationPanel.OnClick = new DelegateCommand(() =>
                     {
                         DetailPanel.SetData(location, Functions.TimeStamp);
+                        DetailPanel.Footprint = new WeeksFootprint(false);
                     });
                     Locations.Add(locationPanel);
                     if (location.Id == "offline" || location.Id == "private")
@@ -227,6 +243,7 @@ namespace VRChatFriends.ViewModels
                 if (userPanel == null)
                 {
                     userPanel = new UserList(user);
+                    Debug.Log("Initialize User : " + user.Id);
                     userPanel.Fav = favoriteList.GetUserFavorite(user.Id);
                     userPanel.ThumbnailURL = user.ThumbnailURL;
                     userPanel.OnClick = new DelegateCommand(() =>
@@ -247,6 +264,7 @@ namespace VRChatFriends.ViewModels
                                 ListFilterUpdate();
                             }
                         ));
+                        DetailPanel.Footprint = watchdog.GetFootPrint(user.Id);
                     });
                 }
                 else
@@ -281,11 +299,14 @@ namespace VRChatFriends.ViewModels
                     .ToList());
             }
             // リストをフィルター
-            ListFilterUpdate();
+            if (user.Location != "offline" && user.Location != "private")
+            {
+                ListFilterUpdate();
+            }
         }
         void OnLostUser (UserData user)
         {
-            // Console.WriteLine(user.Id + " is logout");
+            Debug.Log(user.Id + " is logout");
             var locationPanel = SerchLocation(user.Id);
             var userPanel = SerchUser(user.Id);
             if (locationPanel != null && userPanel != null)
@@ -314,6 +335,8 @@ namespace VRChatFriends.ViewModels
 
         ObservableCollection<LocationList> ListFilterilter(ObservableCollection<LocationList> origin, SortType sort)
         {
+            Debug.Log("List Update => Sorting by : " + sort);
+            if (sort == SortType.None) return origin;
             try
             {
                 var clone = new List<LocationList>();

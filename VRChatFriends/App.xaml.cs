@@ -36,7 +36,7 @@ namespace VRChatFriends
 
         public void OpenListWindow()
         {
-            Console.WriteLine("AutLogin : Success");
+            Debug.Log("AutLogin : Success");
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 var v = new ListWindow();
@@ -58,7 +58,7 @@ namespace VRChatFriends
         }
         public void OpenLoginWindow()
         {
-            Console.WriteLine("AutLogin : Failed");
+            Debug.Log("AutLogin : Failed");
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 var v = new Login();

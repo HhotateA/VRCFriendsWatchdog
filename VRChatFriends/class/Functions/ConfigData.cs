@@ -115,6 +115,11 @@ namespace VRChatFriends.Function
             get { return Properties.Settings.Default.YamiNoData == "enable"; }
             set { Properties.Settings.Default.YamiNoData = value ? "enable" : "disable"; }
         }
+        public static bool Heatmap
+        {
+            get { return Properties.Settings.Default.Heatmap == "enable"; }
+            set { Properties.Settings.Default.Heatmap = value ? "enable" : "disable"; }
+        }
         public static bool Eula
         {
             get { return Properties.Settings.Default.Eula; }

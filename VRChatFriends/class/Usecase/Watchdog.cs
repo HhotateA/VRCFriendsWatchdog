@@ -28,11 +28,25 @@ namespace VRChatFriends.Usecase
                 }
                 else
                 {
-                    api.GetWorldData(location.WorldID, (e) =>
+                    api.GetWorldData(location.Id, (l) =>
                     {
-                        location.Name = e.Name;
-                        location.ThumbnailURL = e.ThumbnailURL;
-                        OnUpdateLocation?.Invoke(location);
+                        location.Name = l.Name;
+                        location.ThumbnailURL = l.ThumbnailURL;
+                        location.Tag = l.Tag;
+                        location.OwnerName = "OwnerUser" ;
+                        if (String.IsNullOrWhiteSpace(l.OwnerId))
+                        {
+                            OnUpdateLocation?.Invoke(location);
+                        }
+                        else
+                        {
+                            api.GetUserData(location.OwnerId, (u) =>
+                            {
+                                location.OwnerId = l.OwnerId;
+                                location.OwnerName = u.Name;
+                                OnUpdateLocation?.Invoke(location);
+                            });
+                        }
                     });
                 }
             };
@@ -63,6 +77,7 @@ namespace VRChatFriends.Usecase
             api.LoginCheck(onSuccess, onFailure);
         }
         public Action<LocationData, UserData> OnAddUser { get; set; }
+        public Action OnUpdateFinish { get; set; }
         public Action<LocationData, UserData> OnRemoveUser { get; set; }
         public Action<UserData> OnUpdateUser { get; set; }
         public Action<LocationData> OnUpdateLocation { get; set; }
@@ -79,21 +94,27 @@ namespace VRChatFriends.Usecase
              {
                  data.UpdateUser(user);
              }
-             ,onFinish
+             ,()=>
+             {
+                 onFinish?.Invoke();
+                 OnUpdateFinish?.Invoke();
+             }
             );
         }
         public void UpdateUserList(Action onFinish = null)
         {
-            api.GetOnlineFriends(user =>
+            api.GetOnlineFriend(user =>
             {
                 data.UpdateUser(user);
-            }
-            ,true
-            ,(users)=>
+            },
+            (users) =>
             {
-                data.UpdateOfflineUser(users,(u, l) =>
+                OnUpdateFinish?.Invoke();
+                data.UpdateOfflineUser(users, (u, l) =>
                 {
-                    log.LogUsers(l,deltaTime);
+                    OnUpdateFinish?.Invoke();
+                    onFinish?.Invoke();
+                    log.LogUsers(l, deltaTime);
                 });
             });
         }
@@ -107,11 +128,11 @@ namespace VRChatFriends.Usecase
         {
             if (ConfigData.APIUpdateInterval > 0)
             {
-                Console.WriteLine("Start Wathcdog");
+                Debug.Log("Start Wathcdog");
                 timer = new Timer(ConfigData.APIUpdateInterval*1000);
                 timer.Elapsed += (sender, e) =>
                 {
-                    Console.WriteLine("Update");
+                    Debug.Log("Update");
                     tick?.Invoke();
                     deltaTime = (int)(Functions.TimeStamp - lastUpdate);
                     lastUpdate = Functions.TimeStamp;
@@ -122,7 +143,7 @@ namespace VRChatFriends.Usecase
         }
         public void StopWatchdog()
         {
-            Console.WriteLine("Stop Wathcdog");
+            Debug.Log("Stop Wathcdog");
             timer?.Stop();
         }
         public List<string> GetDatabase(string id)
@@ -131,7 +152,7 @@ namespace VRChatFriends.Usecase
             var u = log.GetUserLog(id);
             if(u!=null)
             {
-                var sorted = u.OrderBy(l=> l.Value).ToList();
+                var sorted = u.OrderBy(l=> -l.Value).ToList();
                 foreach (var item in sorted)
                 {
                     if(ConfigData.FriendData)
@@ -145,6 +166,11 @@ namespace VRChatFriends.Usecase
                 }
             }
             return o;
+        }
+        
+        public WeeksFootprint GetFootPrint(string id)
+        {
+            return log.GetFootPrint(id);
         }
     }
 }

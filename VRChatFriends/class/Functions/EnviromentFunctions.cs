@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System;
 using System.Collections;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Windows.Markup;
 using System.Windows.Threading;
@@ -50,6 +51,18 @@ namespace VRChatFriends.Function
                 DateTime now = DateTime.Now;
                 return now.ToString("HH:mm:ss");
             }
+        }
+
+        public static int WeekInt()
+        {
+            var now = DateTime.Now;
+            DayOfWeek dow = now.DayOfWeek;
+            return (int)dow;
+        }
+        public static int HourInt()
+        {
+            var now = DateTime.Now;
+            return now.Hour;
         }
         public static string CachePath { get { return Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData, Environment.SpecialFolderOption.Create); } }
         
@@ -140,5 +153,35 @@ namespace VRChatFriends.Function
         None,
         API,
         Local
+    }
+
+    static class Debug
+    {
+        static string[] logs = new string[17]{"","","","","","","","","","","", "", "", "", "", "", "",};
+        public static Action<string> OnCatchLog;
+
+        public static string Logs
+        {
+            get
+            {
+                string t = "";
+                for (int i = 0; i < logs.Length; i++)
+                {
+                    t += logs[i] + Environment.NewLine;
+                }
+                return t;
+            }
+        }
+
+        public static void Log(string log)
+        {
+            for (int i = 1; i < logs.Length; i++)
+            {
+                logs[i - 1] = logs[i];
+            }
+
+            logs[logs.Length - 1] = log;
+            OnCatchLog?.Invoke(Logs);
+        }
     }
 }

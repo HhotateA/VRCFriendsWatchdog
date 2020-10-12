@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using VRChatFriends.Function;
 using System.Windows.Threading;
 using Newtonsoft.Json;
+using VRChatFriends.Function;
 
 namespace VRChatFriends.Entity
 {
@@ -90,7 +91,7 @@ namespace VRChatFriends.Entity
                 return;
 
             //デバッグ用メッセージを出力
-            Console.WriteLine("{0} {1}:{2}", message.Channel.Name, message.Author.Username, message);
+            Debug.Log(message.Channel.Name + " " + message.Author.Username + ":" + message);
 
             var context = new CommandContext(client, message);
 
@@ -271,7 +272,7 @@ namespace VRChatFriends.Entity
 
         private Task Log(LogMessage message)
         {
-            Console.WriteLine(message.ToString());
+            Debug.Log(message.ToString());
             return Task.CompletedTask;
         }
 
@@ -279,7 +280,7 @@ namespace VRChatFriends.Entity
         {
             await Task.Run(() =>
             {
-                Console.WriteLine("Load Discord File");
+                Debug.Log("Load Discord File");
                 string filePath = Functions.FileCheck(ConfigData.DiscordConfigPath);
                 using (StreamReader sr = new StreamReader(
                     filePath,
@@ -303,7 +304,7 @@ namespace VRChatFriends.Entity
         {
             await Task.Run(() =>
             {
-                Console.WriteLine("Save Discord File");
+                Debug.Log("Save Discord File");
                 string filePath = Functions.FileCheck(ConfigData.DiscordConfigPath);
                 if(configData==null)configData = new DiscordConfigData();
                 var f = JsonConvert.SerializeObject(configData);

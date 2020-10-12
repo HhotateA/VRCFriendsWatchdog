@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using VRChatFriends.Function;
 
 namespace VRChatFriends.Entity
 {
@@ -71,7 +72,7 @@ namespace VRChatFriends.Entity
         }
         public async Task UpdateOfflineUser(List<UserData> onlineUser, Action<List<UserData>, List<LocationData>> result = null)
         {
-            Console.WriteLine("Update Offline User");
+            Debug.Log("Update Offline User");
             await Task.Run(() =>
             {
                 for(int i = 0; i<UserDataList.Count;i++)

@@ -7,7 +7,7 @@
              xmlns:tb="http://www.hardcodet.net/taskbar"
              mc:Ignorable="d" 
              Closing="ClosingWindow" 
-             x:Class="VRChatFriends.Views.ListWindow" d:DesignHeight="1000" Icon="ThinkingCat.png" Title="VRCFriendWatchdog">
+             x:Class="VRChatFriends.Views.ListWindow" d:DesignHeight="1358.95" Icon="ThinkingCat.png" Title="VRCFriendWatchdog" d:DesignWidth="1372.187">
     <Grid>
         <tb:TaskbarIcon IconSource="ThinkingCat.ico" ToolTipText="{Binding logTaskbar}">
             <tb:TaskbarIcon.ContextMenu>
@@ -95,22 +95,79 @@
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
-            <ListView 
-                Margin="0,5,0,0"
-                Height="150"
-                SelectionMode="Single"
-                ItemsSource="{Binding DetailPanel.Users}"/>
-            <ListView 
-                Margin="0,5,0,0"
-                Height="150"
-                SelectionMode="Single"
-                ItemsSource="{Binding DetailPanel.HistryDetail}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding DetailData}" />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <StackPanel>
+                    <TextBox Text="Users"/>
+                    <ListView 
+                        Margin="0,0,0,0"
+                        Height="285"
+                        Width="300"
+                        SelectionMode="Single"
+                        ItemsSource="{Binding DetailPanel.Users}"/>
+                </StackPanel>
+                
+                <StackPanel>
+                    <TextBox Text="Heatmap (Red=Public,Green=Friends,Blue=Private)"/>
+                    <ListBox
+                        Height="285"
+                        Width="940"
+                        ItemsSource="{Binding DetailPanel.Footprint.Weeks}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="Padding" Value="-4" />
+                                <Setter Property="Focusable" Value="False" />
+                                <Setter Property="IsEnabled" Value="False"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,-2,-4,-2">
+                                    <Grid>
+                                        <ListBox ItemsSource="{Binding Days}">
+                                            <ListBox.ItemContainerStyle>
+                                                <Style TargetType="ListBoxItem">
+                                                    <Setter Property="Margin" Value="0"  />
+                                                    <Setter Property="Padding" Value="-4" />
+                                                    <Setter Property="Focusable" Value="False" />
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </Style>
+                                            </ListBox.ItemContainerStyle>
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Margin="0,-2,-4,-2" Orientation="Horizontal">
+                                                        <Grid>
+                                                            <TextBlock Width="40" Height="40" FontSize="10" LineStackingStrategy="BlockLineHeight"
+                                                               Text="{Binding Title}" Background="{Binding HeatColor}"/>
+                                                        </Grid>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                            <ListBox.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ListBox.ItemsPanel>
+                                        </ListBox>
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+                <StackPanel>
+                    <TextBox Text="Log"/>
+                    <TextBox Height="285" Width="4000" HorizontalAlignment="Stretch" Text="{Binding Logs}"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Margin="0,10,0,0">
+                <TextBox Text="Footprint"/>
+                <ListView 
+                    Margin="0,0,0,0"
+                    Height="150"
+                    SelectionMode="Single"
+                    ItemsSource="{Binding DetailPanel.HistryDetail}"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>
