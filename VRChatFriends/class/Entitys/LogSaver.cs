@@ -259,11 +259,38 @@ namespace VRChatFriends.Entity
                 FirstOrDefault(l => l.id == id)?.friends.
                 Select(l => { return (l); }).
                 ToDictionary(x => x.name, x => x.count);
+            List<FriendUserSaveData> friends = null;
+            for (int i = 0; i < savedUsers.users.Count; i++)
+            {
+                if (savedUsers.users[i].id == id)
+                {
+                    friends = savedUsers.users[i].friends;
+                }
+            }
+            var output = new Dictionary<string, int>();
+            if(friends!=null)
+            {
+                for (int i = 0; i < friends.Count; i++)
+                {
+                    output.Add(friends[i].name, friends[i].count);
+                }
+            }
+            return output;
         }
 
         public WeeksFootprint GetFootPrint(string id)
         {
             var footprint = savedUsers?.users.FirstOrDefault(l => l.id == id)?.footprint ?? new WeeksFootprint();
+            /*
+            WeeksFootprint footprint = new WeeksFootprint();
+            for(int i=0;i<savedUsers.users.Count;i++)
+            {
+                if(savedUsers.users[i].id == id)
+                {
+                    footprint = savedUsers.users[i].footprint;
+                }
+            }
+            */
             footprint.InitializeColor();
             return footprint;
         }

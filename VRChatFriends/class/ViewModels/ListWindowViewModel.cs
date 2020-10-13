@@ -55,7 +55,7 @@ namespace VRChatFriends.ViewModels
                 }
             };
             watchdog.OnUpdateLocation += OnUpdateLocation;
-            // watchdog.OnLostUser += OnLostUser;
+            watchdog.OnLostUser += OnLostUser;
             watchdog.OnUpdateUser += OnUpdateUser;
             watchdog.OnLogout += OpenLoginDialog;
             isReloading = true;
@@ -78,6 +78,8 @@ namespace VRChatFriends.ViewModels
             });
             OnLogoutClick = new DelegateCommand(() =>
             {
+                ConfigData.UserName = "";
+                ConfigData.Password = "";
                 OpenLoginDialog?.Invoke();
             });
         }
@@ -232,12 +234,13 @@ namespace VRChatFriends.ViewModels
                 if (Locations[i].Location.Id == location.Id)
                 {
                     locationPanel = Locations[i];
+                    break;
                 }
             }
-            var listedLocationPanel = locationPanel;
-            var userPanel = SerchUser(user.Id);
-            var oldLocationPanel = Locations.Where(l => l.Users.Contains(userPanel));
-            if(!oldLocationPanel.Any(l=>l.Location.Id ==location.Id))
+            UserList userPanel = SerchUser(user.Id);
+            LocationList oldLocationPanel = SerchUserLocation(user.Id);
+            var oldLocationId = oldLocationPanel?.Location.Id ?? "NULL_ID";
+            if (oldLocationId != location.Id)
             {
                 if (locationPanel == null)
                 {
@@ -254,10 +257,6 @@ namespace VRChatFriends.ViewModels
                     {
                         locationPanel.FinishInit(location);
                     }
-                }
-                else
-                {
-                    // locationPanel;
                 }
 
                 // ユーザーパネル取得
@@ -291,10 +290,7 @@ namespace VRChatFriends.ViewModels
                 }
                 else
                 {
-                    foreach (var value in oldLocationPanel)
-                    {
-                        value.Users.Remove(userPanel);
-                    }
+                    oldLocationPanel.Users.Remove(userPanel);
                 }
                 userPanel.UpdateTimeStamp();
                 // アバターサムネイルの変更検知のため，ここでもサムネイル取得
@@ -308,7 +304,7 @@ namespace VRChatFriends.ViewModels
                         LogText += " <" + Functions.IdToURL(l.Id) + ">";
                     }
                     notification.Log(LogText);
-                if (userPanel.Fav == FavoriteType.Local)
+                    if (userPanel.Fav == FavoriteType.Local)
                     {
                         notification.Notification(user.Name,l.Name,LogText);
                     }
@@ -331,15 +327,6 @@ namespace VRChatFriends.ViewModels
         void OnLostUser (UserData user)
         {
             Debug.Log(user.Id + " is logout");
-            /* オフラインはオフラインロケーションにJoinという処理に書き換え
-            var locationPanel = SerchLocation(user.Id);
-            var userPanel = SerchUser(user.Id);
-            if (locationPanel != null && userPanel != null)
-            {
-                locationPanel.Users.Remove(userPanel);
-                OfflineLocation()?.Users.Insert(0, userPanel);
-            }
-            */
         }
 
         void OnUpdateUser (UserData user)
@@ -349,6 +336,7 @@ namespace VRChatFriends.ViewModels
             if(userPanel!=null)
             {
                 userPanel.ThumbnailURL = user.ThumbnailURL;
+                userPanel.User.ThumbnailURL = user.ThumbnailURL;
             }
         }
         void OnUpdateLocation(LocationData location)
@@ -386,19 +374,6 @@ namespace VRChatFriends.ViewModels
                     }
                     clone.Add(new LocationList(llist));
                 }
-                /*
-                foreach (var li in origin)
-                {
-                    var i = new LocationList(li);
-                    i.Users.Clear();
-                    foreach (var lj in li.Users)
-                    {
-                        var j = new UserList(lj);
-                        i.Users.Add(j);
-                    }
-                    clone.Add(new LocationList(i));
-                }
-                */
                 if(!String.IsNullOrWhiteSpace(FilterKeyword))
                 {
                     for (int i = 0; i < clone.Count; i++)
@@ -438,7 +413,6 @@ namespace VRChatFriends.ViewModels
                                     clone[i].SortNumber = -clone[i].Users?.Count ?? int.MaxValue / 2;
                                 }
                             };
-                            // clone = clone.Where(l => l.Location.Id != "offline" && l.Location.Id != "private").ToList();
                             break;
                         }
                     case SortType.Sesrch:
@@ -447,7 +421,6 @@ namespace VRChatFriends.ViewModels
                         }
                     case SortType.Timeline:
                         {
-                            // clone = clone.Where(l => l.Location.Id != "offline" && l.Location.Id != "private").ToList();
                             for (int i = 0; i < clone.Count; i++)
                             { 
                                 if(clone[i].Users.Count==0 ||
@@ -514,16 +487,36 @@ namespace VRChatFriends.ViewModels
             }
             return null;
         }
-        LocationList SerchLocation(string id)
+        LocationList SerchUserLocation(string id)
         {
-            var userPanel = Locations.FirstOrDefault(l => l.Users
-                            .Where(m => m != null)
-                            .Any(m => m.User.Id == id));
-            return userPanel;
+            for (int i = 0; i < Locations.Count; i++)
+            {
+                for (int j = 0; j < Locations[i].Users.Count; j++)
+                {
+                    if (Locations[i].Users[j].User.Id == id)
+                    {
+                        return Locations[i];
+                    }
+                }
+
+            }
+            return null;
         }
-        LocationList OfflineLocation()
+        void SerchLocation(string id,ref LocationList location,ref UserList user)
         {
-            return Locations.FirstOrDefault(l => l.location.Id == "offline");
+            for(int i=0;i<Locations.Count;i++)
+            {
+                for(int j=0;j<Locations[i].Users.Count;j++)
+                {
+                    if(Locations[i].Users[j].User.Id == id)
+                    {
+                        location = Locations[i];
+                        user = Locations[i].Users[j];
+                    }
+                }
+            }
+            location = null;
+            user = null;
         }
     }
 }
