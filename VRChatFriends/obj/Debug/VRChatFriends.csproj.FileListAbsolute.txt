@@ -75,7 +75,6 @@ C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\bin\Release\xunit
 C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\bin\Release\xunit.execution.desktop.dll
 C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\bin\Release\VRChatApi.dll
 C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\bin\Release\VRChatApi.pdb
-C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\obj\Debug\VRChatFriends.csprojAssemblyReference.cache
 C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\obj\Debug\VRChatFriends.exe.config
 C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\obj\Debug\class\Views\Login.baml
 C:\Users\HhotateA\source\repos\VRCFriendWatchdog\VRChatFriends\obj\Debug\class\Views\ListWindow.baml

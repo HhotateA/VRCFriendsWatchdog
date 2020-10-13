@@ -159,7 +159,7 @@ namespace VRChatFriends.Entity
                             FriendUserSaveData f = null;
                             for (int m = 0; m < u.friends.Count; m++)
                             {
-                                if (u.friends[m].id == locations[i].Users[j].Id)
+                                if (u.friends[m].id == locations[i].Users[k].Id)
                                 {
                                     f = u.friends[m];
                                     break;

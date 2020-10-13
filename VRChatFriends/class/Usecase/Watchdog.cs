@@ -30,7 +30,7 @@ namespace VRChatFriends.Usecase
                 {
                     api.GetWorldData(location.Id, (l) =>
                     {
-                        location.SetData(l);
+                        location.SetStructData(l);
                         if (String.IsNullOrWhiteSpace(l.OwnerId))
                         {
                             OnUpdateLocation?.Invoke(location);

@@ -113,6 +113,18 @@ namespace VRChatFriends
             ReleaseStatus = origin.ReleaseStatus;
             base.SetData(origin);
         }
+        public void SetStructData(LocationData origin)
+        {
+            WorldID = origin.WorldID;
+            InstanceID = origin.InstanceID;
+            OwnerId = origin.OwnerId;
+            OwnerName = origin.OwnerName;
+            Description = origin.Description;
+            OutherName = origin.OutherName;
+            Capacity = origin.Capacity;
+            ReleaseStatus = origin.ReleaseStatus;
+            base.SetStructData(origin);
+        }
     }
     public class UserFootprints
     {
@@ -199,6 +211,13 @@ namespace VRChatFriends
             ThumbnailURL = origin.ThumbnailURL;
             Tag = origin.Tag;
             OnInitializeFinish = origin.OnInitializeFinish;
+        }
+        public void SetStructData(DataTemplate origin)
+        {
+            Id = origin.Id;
+            Name = origin.Name;
+            ThumbnailURL = origin.ThumbnailURL;
+            Tag = origin.Tag;
         }
     }
 }
