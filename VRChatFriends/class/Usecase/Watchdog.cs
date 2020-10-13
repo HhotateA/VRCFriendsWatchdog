@@ -30,10 +30,7 @@ namespace VRChatFriends.Usecase
                 {
                     api.GetWorldData(location.Id, (l) =>
                     {
-                        location.Name = l.Name;
-                        location.ThumbnailURL = l.ThumbnailURL;
-                        location.Tag = l.Tag;
-                        location.OwnerName = "OwnerUser" ;
+                        location.SetData(l);
                         if (String.IsNullOrWhiteSpace(l.OwnerId))
                         {
                             OnUpdateLocation?.Invoke(location);
@@ -56,6 +53,7 @@ namespace VRChatFriends.Usecase
                 log.LogUser(b);
             };
             data.OnRemoveUser += (a, b) => OnRemoveUser?.Invoke(a, b);
+            data.OnUpdateUser = OnUpdateUser;
             
             //ログアウト検知
             data.OnLostUser += (a) =>

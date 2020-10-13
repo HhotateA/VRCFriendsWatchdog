@@ -25,7 +25,7 @@ namespace VRChatFriends.Function
                 Properties.Settings.Default.Save();
             }
         }
-        public static string PassWord
+        public static string Password
         {
             get
             {

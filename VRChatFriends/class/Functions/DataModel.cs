@@ -17,6 +17,10 @@ namespace VRChatFriends
         public Action OnUpdate;
         public string OwnerId { get; set; }
         public string OwnerName { get; set; }
+        public string OutherName { get; set; }
+        public string Description { get; set; }
+        public string Capacity { get; set; }
+        public string ReleaseStatus { get; set; }
 
         public LocationType Status
         {
@@ -90,7 +94,11 @@ namespace VRChatFriends
             base.Id = id;
         }
 
-        public LocationData(LocationData origin) : base(origin)
+        public LocationData(LocationData origin)
+        {
+            SetData(origin);
+        }
+        public void SetData(LocationData origin)
         {
             WorldID = origin.WorldID;
             InstanceID = origin.InstanceID;
@@ -99,6 +107,11 @@ namespace VRChatFriends
             OwnerId = origin.OwnerId;
             OwnerName = origin.OwnerName;
             OnUpdate = origin.OnUpdate;
+            Description = origin.Description;
+            OutherName = origin.OutherName;
+            Capacity = origin.Capacity;
+            ReleaseStatus = origin.ReleaseStatus;
+            base.SetData(origin);
         }
     }
     public class UserFootprints
@@ -176,6 +189,10 @@ namespace VRChatFriends
         }
 
         public DataTemplate(DataTemplate origin)
+        {
+            SetData(origin);
+        }
+        public void SetData(DataTemplate origin)
         {
             Id = origin.Id;
             Name = origin.Name;

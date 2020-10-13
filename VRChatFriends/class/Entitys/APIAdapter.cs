@@ -46,11 +46,11 @@ namespace VRChatFriends.Entity
             }
             if (string.IsNullOrEmpty(password))
             {
-                password = ConfigData.PassWord;
+                password = ConfigData.Password;
             }
             else
             {
-                ConfigData.PassWord = id;
+                ConfigData.Password = password;
             }
             api = new VRChatApi.VRChatApi(id, password);
             return this;
@@ -267,6 +267,10 @@ namespace VRChatFriends.Entity
                 response.tags.ForEach(l => o.Tag += l + " , ");
                 o.Name = response.name;
                 o.ThumbnailURL = response.thumbnailImageUrl;
+                o.OutherName = response.authorName;
+                o.Description = response.description;
+                o.Capacity = response.occupants + "/" + response.capacity;
+                o.ReleaseStatus = response.releaseStatus.ToString();
             }
             catch
             {

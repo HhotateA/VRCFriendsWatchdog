@@ -271,12 +271,12 @@ namespace VRChatFriends.Function
                 Id = data.Id;
                 ThumbnailURL = data.ThumbnailURL;
                 Platform =  "Owner : " + data.OwnerName;
-                Status = data.Status.ToString();
+                Status = data.Status.ToString() + " <= " + data.ReleaseStatus;
+                Description = "by."+ data.OutherName + " : " + data.Description;
                 if (data.Users.Count(l => l.Platform == "standalonewindows") != 0) Platform += "Windows";
                 if (data.Users.Count(l => l.Platform == "android") != 0) Platform += "Quest";
-                Description = "";
                 Tags = data.Tag;
-                Histry = data.Users.Count + " Users";
+                Histry = data.Users.Count + " Friends <= " + data.Capacity;
 
                 TimeStamp = Functions.TimeStamp;
                 Users = new ObservableCollection<string>();

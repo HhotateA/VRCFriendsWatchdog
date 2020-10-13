@@ -16,6 +16,7 @@ namespace VRChatFriends.Entity
         public Action<LocationData, UserData> OnAddUser { get; set; }
         public Action<LocationData, UserData> OnRemoveUser { get; set; }
         public Action<UserData> OnLostUser { get; set; }
+        public Action<UserData> OnUpdateUser { get; set; }
         public Action<LocationData> OnLostLocation { get; set; }
         public Action<LocationData> OnInitializeLocation { get; set; }
         public Action<UserData> OnInitializeUser { get; set; }
@@ -39,6 +40,12 @@ namespace VRChatFriends.Entity
             if (user.Location == data.Location)
             {
                 // インスタンス移動なし
+                // サムネイル変更
+                if(user.ThumbnailURL!=data.ThumbnailURL)
+                {
+                    user.ThumbnailURL = data.ThumbnailURL;
+                    OnUpdateUser?.Invoke(user);
+                }
             }
             else
             {
