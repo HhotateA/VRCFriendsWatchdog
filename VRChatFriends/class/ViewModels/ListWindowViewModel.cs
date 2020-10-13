@@ -41,9 +41,22 @@ namespace VRChatFriends.ViewModels
                 Logs = l;
             };
             await favoriteList.InitializeFavoriteList().ConfigureAwait(false);
-            watchdog.OnAddUser += OnAddUser;
+            watchdog.OnAddUser += (l,u)=>
+            {
+                try
+                {
+                    OnAddUser(l,u);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.ToString());
+                    Debug.Log("Listing Error... Please Relogin");
+                    throw;
+                }
+            };
             watchdog.OnUpdateLocation += OnUpdateLocation;
             // watchdog.OnLostUser += OnLostUser;
+            watchdog.OnUpdateUser += OnUpdateUser;
             watchdog.OnLogout += OpenLoginDialog;
             isReloading = true;
             watchdog.OnUpdateFinish += ListFilterUpdate;
@@ -213,7 +226,14 @@ namespace VRChatFriends.ViewModels
         void OnAddUser (LocationData location,UserData user)
         {
             // ロケーションパネル取得
-            var locationPanel = Locations.FirstOrDefault(l => l.Location.Id == location.Id);
+            LocationList locationPanel = null;
+            for (int i = 0; i < Locations.Count; i++)
+            {
+                if (Locations[i].Location.Id == location.Id)
+                {
+                    locationPanel = Locations[i];
+                }
+            }
             var listedLocationPanel = locationPanel;
             var userPanel = SerchUser(user.Id);
             var oldLocationPanel = Locations.Where(l => l.Users.Contains(userPanel));
@@ -225,6 +245,7 @@ namespace VRChatFriends.ViewModels
                     Debug.Log("Initialize Location : " + location.Id);
                     locationPanel.OnClick = new DelegateCommand(() =>
                     {
+                        Debug.Log("Click => " + location.Id);
                         DetailPanel.SetData(location, Functions.TimeStamp);
                         DetailPanel.Footprint = new WeeksFootprint(false);
                     });
@@ -248,6 +269,7 @@ namespace VRChatFriends.ViewModels
                     userPanel.ThumbnailURL = user.ThumbnailURL;
                     userPanel.OnClick = new DelegateCommand(() =>
                     {
+                        Debug.Log("Click => " + user.Id);
                         var copyStamp = Functions.TimeStamp;
                         DetailPanel.SetData(user, copyStamp);
                         DetailPanel.SetData(userPanel, copyStamp);
@@ -275,6 +297,8 @@ namespace VRChatFriends.ViewModels
                     }
                 }
                 userPanel.UpdateTimeStamp();
+                // アバターサムネイルの変更検知のため，ここでもサムネイル取得
+                userPanel.ThumbnailURL = user.ThumbnailURL;
                 locationPanel.Users.Insert(0, userPanel);
                 locationPanel.AddOnFinishInit((l) =>
                 {
@@ -307,6 +331,7 @@ namespace VRChatFriends.ViewModels
         void OnLostUser (UserData user)
         {
             Debug.Log(user.Id + " is logout");
+            /* オフラインはオフラインロケーションにJoinという処理に書き換え
             var locationPanel = SerchLocation(user.Id);
             var userPanel = SerchUser(user.Id);
             if (locationPanel != null && userPanel != null)
@@ -314,22 +339,32 @@ namespace VRChatFriends.ViewModels
                 locationPanel.Users.Remove(userPanel);
                 OfflineLocation()?.Users.Insert(0, userPanel);
             }
+            */
+        }
+
+        void OnUpdateUser (UserData user)
+        {
+            Debug.Log(user.Id + " is ChangeAvatar");
+            var userPanel = SerchUser(user.Id);
+            if(userPanel!=null)
+            {
+                userPanel.ThumbnailURL = user.ThumbnailURL;
+            }
         }
         void OnUpdateLocation(LocationData location)
         {
-            var panel = Locations.FirstOrDefault(l => l.Location.Id == location.Id);
+            LocationList panel = null;
+            for(int i=0;i<Locations.Count;i++)
+            {
+                if(Locations[i].Location.Id==location.Id)
+                {
+                    panel = Locations[i];
+                }
+            }
             if (panel != null)
             {
                 panel.FinishInit(location);
                 panel.ThumbnailURL = location.ThumbnailURL;
-            }
-        }
-        void OnUpdateUser(UserData user)
-        {
-            var panel = SerchUser(user.Id);
-            if (panel != null)
-            {
-                panel.FinishInit(user);
             }
         }
 
@@ -378,7 +413,7 @@ namespace VRChatFriends.ViewModels
                             clone[i].SortNumber = int.MaxValue / 2;
                         }
                     }
-                    // clone = clone.Where(l => l.Users.Count != 0).ToList();
+                    clone = clone.Where(l => l.Users.Count != 0).ToList();
                     for(int j=0;j<clone.Count;j++)
                     {
                         clone[j].SortNumber = clone[j].Users.Count == 0 ?
@@ -456,15 +491,16 @@ namespace VRChatFriends.ViewModels
                 }
                 return new ObservableCollection<LocationList>(clone.OrderBy(l => l.SortNumber));
             }
-            catch
+            catch (Exception e)
             {
-                return origin;
+                Debug.Log(e.ToString());
+                Debug.Log("Sorting Erorr... Please Relogin");
+                throw;
             }
         }
 
         UserList SerchUser(string id)
         {
-            UserList userPanel = null;
             for(int i=0;i<Locations.Count;i++)
             {
                 for(int j=0;j< Locations[i].Users.Count;j++)
