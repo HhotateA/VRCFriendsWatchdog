@@ -15,6 +15,12 @@ namespace VRChatFriends.Usecase
         APIAdapter api;
         DataStore data;
         LogSaver log;
+        public void ReloadInstance(Action onFinish=null)
+        {
+            api.ReloadInstance();
+            log.ReloadInstance();
+            onFinish?.Invoke();
+        }
         public Watchdog()
         {
             api = APIAdapter.Instance.Login();

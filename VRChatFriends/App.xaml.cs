@@ -51,6 +51,11 @@ namespace VRChatFriends
                     OpenLoginWindow();
                     CloseActiveWindow(v);
                 });
+                vm.OpenWindow += (() =>
+                {
+                    v.Show();
+
+                });
                 v.AppShutdown += AppShutdown;
                 v.Show();
                 Functions.ActiveWindow = v;

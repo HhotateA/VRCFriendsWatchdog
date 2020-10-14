@@ -82,8 +82,13 @@ namespace VRChatFriends.ViewModels
                 ConfigData.Password = "";
                 OpenLoginDialog?.Invoke();
             });
+            OnTaskIconClick = new DelegateCommand(() =>
+            {
+                OpenWindow?.Invoke();
+            });
         }
         public Action OpenLoginDialog { get;set; }
+        public Action OpenWindow { get; set; }
 
         string logs;
         public string Logs
@@ -205,6 +210,12 @@ namespace VRChatFriends.ViewModels
         {
             get => onLogoutClick;
             set => SetProperty(ref onLogoutClick, value);
+        }
+        ICommand onTaskIconClick;
+        public ICommand OnTaskIconClick
+        {
+            get => onTaskIconClick;
+            set => SetProperty(ref onTaskIconClick, value);
         }
         ObservableCollection<LocationList> filterdLocationList = new ObservableCollection<LocationList>();
         public ObservableCollection<LocationList> FilterdLocationList
@@ -365,14 +376,20 @@ namespace VRChatFriends.ViewModels
                 var clone = new List<LocationList>();
                 for(int i = 0; i<origin.Count;i++)
                 {
-                    var llist = new LocationList(origin[i]);
-                    llist.Users.Clear();
-                    for(int j = 0; j<origin[i].Users.Count;j++)
+                    if(origin[i]!=null)
                     {
-                        var uList = new UserList(origin[i].Users[j]);
-                        llist.Users.Add(uList);
+                        var llist = new LocationList(origin[i]);
+                        llist.Users.Clear();
+                        for (int j = 0; j < origin[i].Users.Count; j++)
+                        {
+                            if(origin[i].Users!=null)
+                            {
+                                var uList = new UserList(origin[i].Users[j]);
+                                llist.Users.Add(uList);
+                            }
+                        }
+                        clone.Add(new LocationList(llist));
                     }
-                    clone.Add(new LocationList(llist));
                 }
                 if(!String.IsNullOrWhiteSpace(FilterKeyword))
                 {
@@ -403,8 +420,17 @@ namespace VRChatFriends.ViewModels
                         {
                             for (int i = 0; i < clone.Count; i++)
                             {
-                                if (clone[i].Users.Count == 0 ||
-                                  (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private"))
+                                if (clone[i].Location.Id == "private")
+                                {
+                                    clone[i].SortNumber = int.MaxValue / 4;
+                                }
+                                else
+                                if (clone[i].Location.Id == "offline")
+                                {
+                                    clone[i].SortNumber = int.MaxValue / 3;
+                                }
+                                else
+                                if (clone[i].Users.Count == 0)
                                 {
                                     clone[i].SortNumber = int.MaxValue / 2;
                                 }
@@ -422,9 +448,18 @@ namespace VRChatFriends.ViewModels
                     case SortType.Timeline:
                         {
                             for (int i = 0; i < clone.Count; i++)
-                            { 
-                                if(clone[i].Users.Count==0 ||
-                                  (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private"))
+                            {
+                                if (clone[i].Location.Id == "private")
+                                {
+                                    clone[i].SortNumber = int.MaxValue / 4;
+                                }
+                                else
+                                if (clone[i].Location.Id == "offline")
+                                {
+                                    clone[i].SortNumber = int.MaxValue / 3;
+                                }
+                                else
+                                if (clone[i].Users.Count == 0)
                                 {
                                     clone[i].SortNumber = int.MaxValue / 2;
                                 }
@@ -439,8 +474,17 @@ namespace VRChatFriends.ViewModels
                         {
                             for(int i = 0; i<clone.Count; i++)
                             {
-                                if (clone[i].Users.Count == 0 || 
-                                   (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private"))
+                                if (clone[i].Location.Id == "private")
+                                {
+                                    clone[i].SortNumber = int.MaxValue / 4;
+                                }
+                                else
+                                if (clone[i].Location.Id == "offline")
+                                {
+                                    clone[i].SortNumber = int.MaxValue / 3;
+                                }
+                                else
+                                if (clone[i].Users.Count == 0)
                                 {
                                     clone[i].SortNumber = int.MaxValue / 2;
                                 }
@@ -476,14 +520,19 @@ namespace VRChatFriends.ViewModels
         {
             for(int i=0;i<Locations.Count;i++)
             {
-                for(int j=0;j< Locations[i].Users.Count;j++)
+                if(Locations[i].Users!=null)
                 {
-                    if(Locations[i].Users[j].User.Id==id)
+                    for (int j = 0; j < Locations[i].Users.Count; j++)
                     {
-                        return Locations[i].Users[j];
+                        if (Locations[i].Users[j]?.User != null)
+                        {
+                            if (Locations[i].Users[j].User.Id == id)
+                            {
+                                return Locations[i].Users[j];
+                            }
+                        }
                     }
                 }
-                
             }
             return null;
         }
@@ -491,14 +540,19 @@ namespace VRChatFriends.ViewModels
         {
             for (int i = 0; i < Locations.Count; i++)
             {
-                for (int j = 0; j < Locations[i].Users.Count; j++)
+                if (Locations[i].Users != null)
                 {
-                    if (Locations[i].Users[j].User.Id == id)
+                    for (int j = 0; j < Locations[i].Users.Count; j++)
                     {
-                        return Locations[i];
+                        if (Locations[i].Users[j]?.User != null)
+                        {
+                            if (Locations[i].Users[j].User.Id == id)
+                            {
+                                return Locations[i];
+                            }
+                        }
                     }
                 }
-
             }
             return null;
         }

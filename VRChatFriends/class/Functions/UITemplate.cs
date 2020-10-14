@@ -35,10 +35,13 @@ namespace VRChatFriends.Function
         }
         public LocationList(LocationList origin) : base(origin)
         {
-            Location = origin.Location;
+            Location = origin?.Location ?? Location;
             for(int i = 0;i< origin.Users.Count;i++)
             {
-                Users.Add(new UserList(origin.Users[i]));
+                if(origin.Users[i]!=null)
+                {
+                    Users.Add(new UserList(origin.Users[i]));
+                }
             }
 
         }
@@ -86,7 +89,7 @@ namespace VRChatFriends.Function
         }
         public UserList(UserList origin) : base(origin)
         {
-            User = origin.User;
+            User = origin?.User ?? User;
         }
         public UserData user = new UserData("id");
         public UserData User
@@ -119,12 +122,12 @@ namespace VRChatFriends.Function
         public ListTemplate(DataTemplate data) { }
         public ListTemplate(ListTemplate origin)
         {
-            Fav = origin.Fav;
-            LastUpdateTime = origin.LastUpdateTime;
-            TimeStamp = origin.TimeStamp;
-            BGColor = origin.BGColor;
-            ThumbnailURL = origin.ThumbnailURL;
-            OnClick = origin.OnClick;
+            Fav = origin?.Fav ?? Fav;
+            LastUpdateTime = origin?.LastUpdateTime ?? LastUpdateTime;
+            TimeStamp = origin?.TimeStamp ?? TimeStamp;
+            BGColor = origin?.BGColor ?? BGColor;
+            ThumbnailURL = origin?.ThumbnailURL ?? ThumbnailURL;
+            OnClick = origin?.OnClick ?? OnClick;
         }
         public void UpdateTimeStamp()
         {
@@ -182,10 +185,7 @@ namespace VRChatFriends.Function
             {
                 if (!String.IsNullOrWhiteSpace(value))
                 {
-                    if (thumbnailURL != value)
-                    {
-                        SetProperty(ref thumbnailURL, value);
-                    }
+                    SetProperty(ref thumbnailURL, value);
                 }
             }
         }

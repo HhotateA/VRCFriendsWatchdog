@@ -7,9 +7,10 @@
              xmlns:tb="http://www.hardcodet.net/taskbar"
              mc:Ignorable="d" 
              Closing="ClosingWindow" 
-             x:Class="VRChatFriends.Views.ListWindow" d:DesignHeight="916.95" Icon="ThinkingCat.png" Title="VRCFriendWatchdog" d:DesignWidth="1372.187">
+             SizeChanged="ListWindow_SizeChanged"
+             x:Class="VRChatFriends.Views.ListWindow" d:DesignHeight="1250" d:DesignWidth="1400" Icon="ThinkingCat.png" Title="VRCFriendWatchdog">
     <Grid>
-        <tb:TaskbarIcon IconSource="ThinkingCat.ico" ToolTipText="{Binding logTaskbar}">
+        <tb:TaskbarIcon IconSource="ThinkingCat.ico" ToolTipText="{Binding logTaskbar}" LeftClickCommand="{Binding OnTaskIconClick}">
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem x:Name="OpenMenu" Header="Open" Click="OpenApp"/>
@@ -31,7 +32,7 @@
                         SelectedValue="{Binding SortFilter}" Width="100" HorizontalAlignment="Left"/>
                 </Grid>
 
-                <Border BorderThickness="10" BorderBrush="Black">
+                <Border x:Name="UpdateData" BorderThickness="1" BorderBrush="Black" Margin="0,5,0,0">
                     <StackPanel Margin="10">
                         <TextBlock TextWrapping="Wrap" Text="{Binding LogText}" HorizontalAlignment="Center" Height="30" />
                         <TextBlock TextWrapping="Wrap" Text="{Binding OnlineCount}" HorizontalAlignment="Center" />
@@ -158,13 +159,13 @@
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="Log"/>
-                        <TextBox Height="285" Width="4000" HorizontalAlignment="Stretch" Text="{Binding Logs}"/>
+                        <TextBox x:Name="Log" Height="285" Width="130" HorizontalAlignment="Stretch" Text="{Binding Logs}"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Margin="0,10,0,0">
                     <TextBlock Text="Footprint"/>
                     <ListView 
-                        Margin="0,0,0,0"
+                        Margin="0,0,0,10"
                         Height="150"
                         SelectionMode="Single"
                         ItemsSource="{Binding DetailPanel.HistryDetail}"/>

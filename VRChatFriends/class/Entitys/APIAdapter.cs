@@ -31,6 +31,12 @@ namespace VRChatFriends.Entity
             Login(id,password);
         }
 
+        public void ReloadInstance()
+        {
+            instance = new APIAdapter();
+            instance.Login();
+        }
+
         /// <summary>
         /// ログインを行う．
         /// </summary>

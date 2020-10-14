@@ -26,6 +26,12 @@ namespace VRChatFriends.Entity
                 }
                 return instance;
             }
+        }        
+
+        public void ReloadInstance()
+        {
+            timer.Stop();
+            instance = new LogSaver();
         }
         UsersSaveData savedUsers;
         Timer timer;
@@ -112,7 +118,7 @@ namespace VRChatFriends.Entity
                             FriendUserSaveData f = null;
                             for (int m = 0; m < u.friends.Count; m++)
                             {
-                                if (u.friends[m].id == friend.Id)
+                                if (u.friends[m]?.id == friend.Id)
                                 {
                                     f = u.friends[m];
                                     break;
@@ -159,7 +165,7 @@ namespace VRChatFriends.Entity
                             FriendUserSaveData f = null;
                             for (int m = 0; m < u.friends.Count; m++)
                             {
-                                if (u.friends[m].id == locations[i].Users[k].Id)
+                                if (u.friends[m]?.id == locations[i].Users[k].Id)
                                 {
                                     f = u.friends[m];
                                     break;
@@ -189,42 +195,36 @@ namespace VRChatFriends.Entity
         }
         public async Task LoadLog()
         {
-            await Task.Run(() =>
+            Debug.Log("Load Log File");
+            string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
+            using (StreamReader sr = new StreamReader(
+                filePath,
+                Encoding.UTF8))
             {
-                Debug.Log("Load Log File");
-                string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
-                using (StreamReader sr = new StreamReader(
-                    filePath,
-                    Encoding.UTF8))
+                var f = sr.ReadToEnd();
+                try
                 {
-                    var f = sr.ReadToEnd();
-                    try
-                    {
-                        savedUsers = JsonConvert.DeserializeObject<UsersSaveData>(f);
-                        if (savedUsers == null) savedUsers = new UsersSaveData();
-                    }
-                    catch
-                    {
-                        savedUsers = new UsersSaveData();
-                    }
+                    savedUsers = JsonConvert.DeserializeObject<UsersSaveData>(f);
+                    if (savedUsers == null) savedUsers = new UsersSaveData();
                 }
-            }).ConfigureAwait(false);
+                catch
+                {
+                    savedUsers = new UsersSaveData();
+                }
+            }
         }
         public async Task SaveLog()
         {
-            await Task.Run(() =>
+            Debug.Log("Save Log File");
+            string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
+            if(savedUsers == null) savedUsers = new UsersSaveData();
+            var f = JsonConvert.SerializeObject(savedUsers);
+            using (StreamWriter sw = new StreamWriter(
+                filePath,
+                false, Encoding.UTF8))
             {
-                Debug.Log("Save Log File");
-                string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
-                if(savedUsers == null) savedUsers = new UsersSaveData();
-                var f = JsonConvert.SerializeObject(savedUsers);
-                using (StreamWriter sw = new StreamWriter(
-                    filePath,
-                    false, Encoding.UTF8))
-                {
-                    sw.Write(f);
-                }
-            }).ConfigureAwait(false);
+                sw.Write(f);
+            }
         }
         List<string> logCache = new List<string>();
         public void LogUser(UserData user)
@@ -255,16 +255,12 @@ namespace VRChatFriends.Entity
         }
         public Dictionary<string,int> GetUserLog(string id)
         {
-            return savedUsers?.users.
-                FirstOrDefault(l => l.id == id)?.friends.
-                Select(l => { return (l); }).
-                ToDictionary(x => x.name, x => x.count);
             List<FriendUserSaveData> friends = null;
             for (int i = 0; i < savedUsers.users.Count; i++)
             {
-                if (savedUsers.users[i].id == id)
+                if (savedUsers.users[i]?.id == id)
                 {
-                    friends = savedUsers.users[i].friends;
+                    friends = savedUsers.users[i]?.friends;
                 }
             }
             var output = new Dictionary<string, int>();
@@ -272,7 +268,10 @@ namespace VRChatFriends.Entity
             {
                 for (int i = 0; i < friends.Count; i++)
                 {
-                    output.Add(friends[i].name, friends[i].count);
+                    if (friends[i] != null)
+                    {
+                        output.Add(friends[i].name, friends[i].count);
+                    }
                 }
             }
             return output;
@@ -280,8 +279,6 @@ namespace VRChatFriends.Entity
 
         public WeeksFootprint GetFootPrint(string id)
         {
-            var footprint = savedUsers?.users.FirstOrDefault(l => l.id == id)?.footprint ?? new WeeksFootprint();
-            /*
             WeeksFootprint footprint = new WeeksFootprint();
             for(int i=0;i<savedUsers.users.Count;i++)
             {
@@ -290,7 +287,6 @@ namespace VRChatFriends.Entity
                     footprint = savedUsers.users[i].footprint;
                 }
             }
-            */
             footprint.InitializeColor();
             return footprint;
         }
