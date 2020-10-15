@@ -9,6 +9,7 @@ using VRChatFriends.Function;
 using Newtonsoft.Json;
 using System.Timers;
 using System.Windows.Threading;
+using Console = System.Console;
 
 namespace VRChatFriends.Entity
 {
@@ -25,6 +26,10 @@ namespace VRChatFriends.Entity
                 }
                 return instance;
             }
+        }        
+
+        public void ReloadInstance()
+        {
         }
         UsersSaveData savedUsers;
         Timer timer;
@@ -42,34 +47,81 @@ namespace VRChatFriends.Entity
             }
             SaveFullLog();
         }
-        async public void LogUsers(List<LocationData> locations,int countUp=1)
+        public async Task LogUsers(List<LocationData> locations,int countUp=1)
         {
-            await Task.Run(() =>
+            if (savedUsers==null)
             {
-                if (savedUsers==null)
+                Debug.Log("Create Log ...");
+                savedUsers = new UsersSaveData();
+            }
+            Debug.Log("Write Log ...");
+            for(int i=0;i<locations.Count;i++)
+            {
+                for(int j=0;j<locations[i].Users.Count;j++)
                 {
-                    Console.WriteLine("Create Log ...");
-                    savedUsers = new UsersSaveData();
-                }
-                Console.WriteLine("Write Log ...");
-                foreach (var location in locations)
-                {
-                    if (location.Id == "offline" || location.Id == "private") continue;
-                    foreach (var user in location.Users)
+                    UserSaveData u = null;
+                    for (int k = 0; k < savedUsers.users.Count; k++)
                     {
-                        var u = savedUsers.users.FirstOrDefault(l => l.id == user.Id);
+                        if (savedUsers.users[k].id == locations[i].Users[j].Id)
+                        {
+                            u = savedUsers.users[k];
+                            break;
+                        }
+                    }
+                    if (u == null)
+                    {
+                        u = new UserSaveData();
+                        u.id = locations[i].Users[j].Id;
+                        u.name = locations[i].Users[j].Name;
+                        u.lastUpdate = Functions.DateString;
+                        u.friends = new List<FriendUserSaveData>();
+                        u.footprint = new WeeksFootprint();
+                        savedUsers.users.Add(u);
+                    }
+                    // 時間ごとのログイン履歴を記録
+                    u.footprint.CountupFootorint(
+                        Functions.WeekInt(),Functions.HourInt(),
+                        locations[i].Status,countUp);
+                }
+                if (locations[i].Id == "offline")
+                {
+                    // continue;
+                }
+                else
+                if (locations[i].Id == "private")
+                {
+                    // プラべの場合自分だけ加算
+                    for (int j = 0; j < locations[i].Users.Count; j++)
+                    {
+                        UserSaveData u = null;
+                        for (int k = 0; k < savedUsers.users.Count; k++)
+                        {
+                            if (savedUsers.users[k].id == locations[i].Users[j].Id)
+                            {
+                                u = savedUsers.users[k];
+                                break;
+                            }
+                        }
                         if (u == null)
                         {
                             u = new UserSaveData();
-                            u.id = user.Id;
-                            u.name = user.Name;
+                            u.id = locations[i].Users[j].Id;
+                            u.name = locations[i].Users[j].Name;
                             u.lastUpdate = Functions.DateString;
                             u.friends = new List<FriendUserSaveData>();
                             savedUsers.users.Add(u);
                         }
-                        foreach (var friend in location.Users)
                         {
-                            var f = u.friends.FirstOrDefault(l => l.id == friend.Id);
+                            var friend = locations[i].Users[j];
+                            FriendUserSaveData f = null;
+                            for (int m = 0; m < u.friends.Count; m++)
+                            {
+                                if (u.friends[m]?.id == friend.Id)
+                                {
+                                    f = u.friends[m];
+                                    break;
+                                }
+                            }
                             if (f == null)
                             {
                                 f = new FriendUserSaveData();
@@ -83,47 +135,94 @@ namespace VRChatFriends.Entity
                         }
                     }
                 }
-                SaveLog();
-            }).ConfigureAwait(false);
+                else
+                {
+                    // インスタンスないの全員を加算
+                    for (int j = 0; j < locations[i].Users.Count; j++)
+                    {
+                        UserSaveData u = null;
+                        for (int k = 0; k < savedUsers.users.Count; k++)
+                        {
+                            if (savedUsers.users[k].id == locations[i].Users[j].Id)
+                            {
+                                u = savedUsers.users[k];
+                                break;
+                            }
+                        }
+                        if (u == null)
+                        {
+                            u = new UserSaveData();
+                            u.id = locations[i].Users[j].Id;
+                            u.name = locations[i].Users[j].Name;
+                            u.lastUpdate = Functions.DateString;
+                            u.friends = new List<FriendUserSaveData>();
+                            savedUsers.users.Add(u);
+                        }
+                        for (int k = 0; k < locations[i].Users.Count; k++)
+                        {
+                            FriendUserSaveData f = null;
+                            for (int m = 0; m < u.friends.Count; m++)
+                            {
+                                if (u.friends[m]?.id == locations[i].Users[k].Id)
+                                {
+                                    f = u.friends[m];
+                                    break;
+                                }
+                            }
+                            if (f == null)
+                            {
+                                f = new FriendUserSaveData();
+                                f.id = locations[i].Users[k].Id;
+                                f.name = locations[i].Users[k].Name;
+                                f.lastUpdate = Functions.DateString;
+                                f.count = 0;
+                                u.friends.Add(f);
+                            }
+                            f.count += countUp;
+                        }
+                        // ロケーションデータ側にも記録
+                        if (!locations[i].UserHistry.ContainsKey(locations[i].Users[j].Id))
+                        {
+                            locations[i].UserHistry.Add(locations[i].Users[j].Id,new UserFootprints(locations[i].Users[j].Name, locations[i].Users[j].Id));
+                        }
+                        locations[i].UserHistry[locations[i].Users[j].Id].Count += countUp;
+                    }
+                }
+            }
+            SaveLog();
         }
         public async Task LoadLog()
         {
-            await Task.Run(() =>
+            Debug.Log("Load Log File");
+            string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
+            using (StreamReader sr = new StreamReader(
+                filePath,
+                Encoding.UTF8))
             {
-                Console.WriteLine("Load Log File");
-                string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
-                using (StreamReader sr = new StreamReader(
-                    filePath,
-                    Encoding.UTF8))
+                var f = sr.ReadToEnd();
+                try
                 {
-                    var f = sr.ReadToEnd();
-                    try
-                    {
-                        savedUsers = JsonConvert.DeserializeObject<UsersSaveData>(f);
-                        if (savedUsers == null) savedUsers = new UsersSaveData();
-                    }
-                    catch
-                    {
-                        savedUsers = new UsersSaveData();
-                    }
+                    savedUsers = JsonConvert.DeserializeObject<UsersSaveData>(f);
+                    if (savedUsers == null) savedUsers = new UsersSaveData();
                 }
-            }).ConfigureAwait(false);
+                catch
+                {
+                    savedUsers = new UsersSaveData();
+                }
+            }
         }
         public async Task SaveLog()
         {
-            await Task.Run(() =>
+            Debug.Log("Save Log File");
+            string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
+            if(savedUsers == null) savedUsers = new UsersSaveData();
+            var f = JsonConvert.SerializeObject(savedUsers);
+            using (StreamWriter sw = new StreamWriter(
+                filePath,
+                false, Encoding.UTF8))
             {
-                Console.WriteLine("Save Log File");
-                string filePath = Functions.FileCheck(ConfigData.LogOutputPath, ConfigData.UserLogFileName);
-                if(savedUsers == null) savedUsers = new UsersSaveData();
-                var f = JsonConvert.SerializeObject(savedUsers);
-                using (StreamWriter sw = new StreamWriter(
-                    filePath,
-                    false, Encoding.UTF8))
-                {
-                    sw.Write(f);
-                }
-            }).ConfigureAwait(false);
+                sw.Write(f);
+            }
         }
         List<string> logCache = new List<string>();
         public void LogUser(UserData user)
@@ -154,10 +253,40 @@ namespace VRChatFriends.Entity
         }
         public Dictionary<string,int> GetUserLog(string id)
         {
-            return savedUsers?.users.
-                FirstOrDefault(l => l.id == id)?.friends.
-                Select(l => { return (l); }).
-                ToDictionary(x => x.name, x => x.count);
+            List<FriendUserSaveData> friends = null;
+            for (int i = 0; i < savedUsers.users.Count; i++)
+            {
+                if (savedUsers.users[i]?.id == id)
+                {
+                    friends = savedUsers.users[i]?.friends;
+                }
+            }
+            var output = new Dictionary<string, int>();
+            if(friends!=null)
+            {
+                for (int i = 0; i < friends.Count; i++)
+                {
+                    if (friends[i] != null)
+                    {
+                        output.Add(friends[i].name, friends[i].count);
+                    }
+                }
+            }
+            return output;
+        }
+
+        public WeeksFootprint GetFootPrint(string id)
+        {
+            WeeksFootprint footprint = new WeeksFootprint();
+            for(int i=0;i<savedUsers.users.Count;i++)
+            {
+                if(savedUsers.users[i].id == id)
+                {
+                    footprint = savedUsers.users[i].footprint;
+                }
+            }
+            footprint.InitializeColor();
+            return footprint;
         }
     }
 }

@@ -36,32 +36,34 @@ namespace VRChatFriends
 
         public void OpenListWindow()
         {
-            Console.WriteLine("AutLogin : Success");
+            Debug.Log("AutLogin : Success");
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 var v = new ListWindow();
+                Functions.ActiveWindow = v;
                 var vm = new ListWindowViewModel();
                 v.DataContext = vm;
-                v.OnKeywordChange += (e) =>
-                {
-                    vm.ListFilterUpdate();
-                };
                 vm.OpenLoginDialog += (() =>
                 {
                     OpenLoginWindow();
                     CloseActiveWindow(v);
                 });
+                vm.OpenWindow += (() =>
+                {
+                    v.Show();
+
+                });
                 v.AppShutdown += AppShutdown;
                 v.Show();
-                Functions.ActiveWindow = v;
             }));
         }
         public void OpenLoginWindow()
         {
-            Console.WriteLine("AutLogin : Failed");
+            Debug.Log("AutLogin : Failed");
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 var v = new Login();
+                Functions.ActiveWindow = v;
                 var vm = new LoginViewModel();
                 v.DataContext = vm;
                 v.OnPasswordChange += (e) =>
@@ -74,7 +76,6 @@ namespace VRChatFriends
                     CloseActiveWindow(v);
                 });
                 v.Show();
-                Functions.ActiveWindow = v;
             }));
         }
         public void CloseActiveWindow(Window window)

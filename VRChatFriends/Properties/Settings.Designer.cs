@@ -62,7 +62,8 @@ namespace VRChatFriends.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("https://i.gyazo.com/702d3d58cce90f3fbdbed2fc0b61a75f.png")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://github.com/HhotateA/portfolio/blob/master/images/ThinkingCat.png?raw=true" +
+            "")]
         public string ThumbnailURL {
             get {
                 return ((string)(this["ThumbnailURL"]));
@@ -158,7 +159,7 @@ namespace VRChatFriends.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("disable")]
+        [global::System.Configuration.DefaultSettingValueAttribute("enable")]
         public string YamiNoData {
             get {
                 return ((string)(this["YamiNoData"]));
@@ -170,13 +171,25 @@ namespace VRChatFriends.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("disable")]
+        [global::System.Configuration.DefaultSettingValueAttribute("enable")]
         public string FullLog {
             get {
                 return ((string)(this["FullLog"]));
             }
             set {
                 this["FullLog"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("enable")]
+        public string Heatmap {
+            get {
+                return ((string)(this["Heatmap"]));
+            }
+            set {
+                this["Heatmap"] = value;
             }
         }
         
@@ -189,6 +202,30 @@ namespace VRChatFriends.Properties {
             }
             set {
                 this["Eula"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int ListMinHeight {
+            get {
+                return ((int)(this["ListMinHeight"]));
+            }
+            set {
+                this["ListMinHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int DataWindowHeight {
+            get {
+                return ((int)(this["DataWindowHeight"]));
+            }
+            set {
+                this["DataWindowHeight"] = value;
             }
         }
     }

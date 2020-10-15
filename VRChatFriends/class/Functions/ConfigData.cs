@@ -19,9 +19,13 @@ namespace VRChatFriends.Function
         public static string UserName
         {
             get { return Properties.Settings.Default.UserName; }
-            set { Properties.Settings.Default.UserName = value; }
+            set
+            {
+                Properties.Settings.Default.UserName = value;
+                Properties.Settings.Default.Save();
+            }
         }
-        public static string PassWord
+        public static string Password
         {
             get
             {
@@ -34,7 +38,11 @@ namespace VRChatFriends.Function
                     return "";
                 }
             }
-            set { Properties.Settings.Default.Password = value; }
+            set 
+            { 
+                Properties.Settings.Default.Password = value;
+                Properties.Settings.Default.Save();
+            }
         }
         public static string PassWord_Hash
         {
@@ -115,10 +123,25 @@ namespace VRChatFriends.Function
             get { return Properties.Settings.Default.YamiNoData == "enable"; }
             set { Properties.Settings.Default.YamiNoData = value ? "enable" : "disable"; }
         }
+        public static bool Heatmap
+        {
+            get { return Properties.Settings.Default.Heatmap == "enable"; }
+            set { Properties.Settings.Default.Heatmap = value ? "enable" : "disable"; }
+        }
         public static bool Eula
         {
             get { return Properties.Settings.Default.Eula; }
             set { Properties.Settings.Default.Eula = value; }
+        }
+        public static int ListMinHeight
+        {
+            get { return Properties.Settings.Default.ListMinHeight; }
+            set { Properties.Settings.Default.ListMinHeight = value; }
+        }
+        public static int DataWindowHeight
+        {
+            get { return Properties.Settings.Default.DataWindowHeight; }
+            set { Properties.Settings.Default.DataWindowHeight = value; }
         }
     }
 }

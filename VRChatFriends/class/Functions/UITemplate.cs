@@ -22,6 +22,7 @@ using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Input;
+using Windows.System;
 using VRChatFriends.Function;
 
 namespace VRChatFriends.Function
@@ -34,10 +35,13 @@ namespace VRChatFriends.Function
         }
         public LocationList(LocationList origin) : base(origin)
         {
-            Location = origin.Location;
+            Location = origin?.Location ?? Location;
             for(int i = 0;i< origin.Users.Count;i++)
             {
-                Users.Add(new UserList(origin.Users[i]));
+                if(origin.Users[i]!=null)
+                {
+                    Users.Add(new UserList(origin.Users[i]));
+                }
             }
 
         }
@@ -54,7 +58,13 @@ namespace VRChatFriends.Function
         public ObservableCollection<UserList> Users
         {
             get => users;
-            set => SetProperty(ref users, value);
+            set
+            {
+                Functions.DispatcheFunction(() =>
+                {
+                    SetProperty(ref users, value);
+                });
+            }
         }
         public bool IsInit = false;
         Action<LocationData> onFinishInit;
@@ -72,7 +82,7 @@ namespace VRChatFriends.Function
             {
                 IsInit = true;
                 Location = data;
-                // Console.WriteLine("FinishInit" + Location.Id);
+                // Debug.Log("FinishInit" + Location.Id);
                 onFinishInit?.Invoke(Location);
             }
         }
@@ -85,7 +95,7 @@ namespace VRChatFriends.Function
         }
         public UserList(UserList origin) : base(origin)
         {
-            User = origin.User;
+            User = origin?.User ?? User;
         }
         public UserData user = new UserData("id");
         public UserData User
@@ -118,12 +128,12 @@ namespace VRChatFriends.Function
         public ListTemplate(DataTemplate data) { }
         public ListTemplate(ListTemplate origin)
         {
-            Fav = origin.Fav;
-            LastUpdateTime = origin.LastUpdateTime;
-            TimeStamp = origin.TimeStamp;
-            BGColor = origin.BGColor;
-            ThumbnailURL = origin.ThumbnailURL;
-            OnClick = origin.OnClick;
+            Fav = origin?.Fav ?? Fav;
+            LastUpdateTime = origin?.LastUpdateTime ?? LastUpdateTime;
+            TimeStamp = origin?.TimeStamp ?? TimeStamp;
+            BGColor = origin?.BGColor ?? BGColor;
+            ThumbnailURL = origin?.ThumbnailURL ?? ThumbnailURL;
+            OnClick = origin?.OnClick ?? OnClick;
         }
         public void UpdateTimeStamp()
         {
@@ -181,10 +191,7 @@ namespace VRChatFriends.Function
             {
                 if (!String.IsNullOrWhiteSpace(value))
                 {
-                    if (thumbnailURL != value)
-                    {
-                        SetProperty(ref thumbnailURL, value);
-                    }
+                    SetProperty(ref thumbnailURL, value);
                 }
             }
         }
@@ -266,59 +273,38 @@ namespace VRChatFriends.Function
         {
             if (TimeStamp <= copyStamp || copyStamp == 0)
             {
+                Functions.DispatcheFunction(()=>{});
                 Name = data.Name;
                 Id = data.Id;
                 ThumbnailURL = data.ThumbnailURL;
-                Platform = "PLATFORM : ";
+                Platform =  "Owner : " + data.OwnerName + "     (Author: " + data.OutherName + " )";
+                Status = data.Status.ToString() + " <= " + data.ReleaseStatus;
+                Description = data.Description;
                 if (data.Users.Count(l => l.Platform == "standalonewindows") != 0) Platform += "Windows";
                 if (data.Users.Count(l => l.Platform == "android") != 0) Platform += "Quest";
-                description = "COMMENT";
-                Tags = data.Tag ?? "";
-                Histry = "Histry";
-                if(data.Id == "private")
-                {
-                    Status = "PRIVATE";
-                }
-                else
-                if(data.Id == "offline")
-                {
-                    Status = "OFFLINE";
-                }
-                else
-                if(data.Id.Contains("hidden"))
-                {
-                    Status = "Friend Pulus";
-                }
-                else
-                if (data.Id.Contains("friends"))
-                {
-                    Status = "Friends";
-                }
-                else
-                if (Tags.Contains("private"))
-                {
-                    Status = "Invite";
-                }
-                else
-                if (Tags.Contains("canRequestInvite"))
-                {
-                    Status = "Invite Plus";
-                }
-                else
-                {
-                    Status = "Public";
-                }
+                Tags = data.Tag;
+                Histry = data.Users.Count + " Friends <= " + data.Capacity;
 
                 TimeStamp = Functions.TimeStamp;
+                HistryDetail = new ObservableCollection<string>();
                 Users = new ObservableCollection<string>();
+                var usersList = new List<string>();
                 if(data.Id != "private" && data.Id != "offline")
                 {
-                    foreach (var value in data.Users)
+                    for(int i=0;i<data.Users.Count;i++)
                     {
-                        Users.Add(value.Name);
+                        Function.Debug.Log("aa" + data.Users[i].Name);
+                        usersList.Add(data.Users[i].Name);
                     }
+                    Users = new ObservableCollection<string>(usersList);
+                    HistryDetail = new ObservableCollection<string>(data.UserHistry.Select(l=>l.Value.DetailData));
                 }
-                OnClickFavorite = new DelegateCommand(()=> { });
+
+                WatchTitle = "Detail";
+                OnClickFavorite = new DelegateCommand(() =>
+                {
+                    System.Diagnostics.Process.Start(Functions.IdToURLDetail(data.Id));
+                });
                 OnJoinClick = new DelegateCommand(() =>
                 {
                     System.Diagnostics.Process.Start(Functions.IdToURL(data.Id));
@@ -330,7 +316,7 @@ namespace VRChatFriends.Function
             if (TimeStamp <= copyStamp || copyStamp == 0)
             {
                 Date = data.LastUpdateTime;
-                HistryDetail = new ObservableCollection<LocationHistryData>(data.LocationHistryList);
+                SetLocationHistry(new ObservableCollection<LocationHistryData>(data.LocationHistryList));
 
                 TimeStamp = Functions.TimeStamp;
             }
@@ -368,6 +354,11 @@ namespace VRChatFriends.Function
             }
             return output;
         }
+        public void SetLocationHistry(ObservableCollection<LocationHistryData> value)
+        {
+            HistryDetail = new ObservableCollection<string>(value.Select(l => l.DetailData).ToList());
+            Histry = GetLocationHistry(value);
+        }
 
         long timeStamp = 0;
         public long TimeStamp
@@ -394,6 +385,10 @@ namespace VRChatFriends.Function
                     {
                         SetProperty(ref thumbnailURL, value);
                     }
+                }
+                else
+                {
+                    SetProperty(ref thumbnailURL, ConfigData.DefaultThumbnailURL);
                 }
             }
         }
@@ -443,18 +438,34 @@ namespace VRChatFriends.Function
         public ObservableCollection<string> Users
         {
             get => users;
-            set => SetProperty(ref users, value);
+            set
+            {
+                Functions.DispatcheFunction(() =>
+                {
+                    SetProperty(ref users, value);
+                });
+            }
         }
-        ObservableCollection<LocationHistryData> histryDetail;
-        public ObservableCollection<LocationHistryData> HistryDetail
+        ObservableCollection<string> histryDetail;
+        public ObservableCollection<string> HistryDetail
         {
             get => histryDetail;
             set
             {
-                SetProperty(ref histryDetail, value);
-                Histry = GetLocationHistry(value);
+                Functions.DispatcheFunction(() =>
+                {
+                    SetProperty(ref histryDetail, value);
+                });
             }
         }
+
+        WeeksFootprint footprint = new WeeksFootprint(false);
+
+        public WeeksFootprint Footprint
+        {
+            get => footprint;
+            set => SetProperty(ref footprint, value);
+        } 
 
         ICommand onClickFavorite;
         public ICommand OnClickFavorite
@@ -467,6 +478,19 @@ namespace VRChatFriends.Function
         {
             get => onJoinClick;
             set => SetProperty(ref onJoinClick, value);
+        }
+        string watchTitle = "Watch";
+        public string WatchTitle
+        {
+            get => watchTitle;
+            set => SetProperty(ref watchTitle, value);
+        }
+        string joinTitle = "Join";
+
+        public string JoinTitle
+        {
+            get => joinTitle;
+            set => SetProperty(ref joinTitle, value);
         }
     }
 

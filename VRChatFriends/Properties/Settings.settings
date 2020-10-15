@@ -12,7 +12,7 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ThumbnailURL" Type="(Web Service URL)" Scope="User">
-      <Value Profile="(Default)">https://i.gyazo.com/702d3d58cce90f3fbdbed2fc0b61a75f.png</Value>
+      <Value Profile="(Default)">https://github.com/HhotateA/portfolio/blob/master/images/ThinkingCat.png?raw=true</Value>
     </Setting>
     <Setting Name="LogOutputPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">./Logs</Value>
@@ -36,13 +36,22 @@
       <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="YamiNoData" Type="System.String" Scope="User">
-      <Value Profile="(Default)">disable</Value>
+      <Value Profile="(Default)">enable</Value>
     </Setting>
     <Setting Name="FullLog" Type="System.String" Scope="User">
-      <Value Profile="(Default)">disable</Value>
+      <Value Profile="(Default)">enable</Value>
+    </Setting>
+    <Setting Name="Heatmap" Type="System.String" Scope="User">
+      <Value Profile="(Default)">enable</Value>
     </Setting>
     <Setting Name="Eula" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="ListMinHeight" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">100</Value>
+    </Setting>
+    <Setting Name="DataWindowHeight" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1000</Value>
     </Setting>
   </Settings>
 </SettingsFile>

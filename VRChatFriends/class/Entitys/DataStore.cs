@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using VRChatFriends.Function;
 
 namespace VRChatFriends.Entity
 {
@@ -15,9 +16,16 @@ namespace VRChatFriends.Entity
         public Action<LocationData, UserData> OnAddUser { get; set; }
         public Action<LocationData, UserData> OnRemoveUser { get; set; }
         public Action<UserData> OnLostUser { get; set; }
+        public Action<UserData> OnUpdateUser { get; set; }
         public Action<LocationData> OnLostLocation { get; set; }
         public Action<LocationData> OnInitializeLocation { get; set; }
         public Action<UserData> OnInitializeUser { get; set; }
+
+        public void ReloadInstance()
+        {
+            LocationDataList = new Dictionary<string, LocationData>();
+            UserDataList = new Dictionary<string, UserData>();
+        }
 
         public void UpdateUser(UserData data)
         {
@@ -38,6 +46,12 @@ namespace VRChatFriends.Entity
             if (user.Location == data.Location)
             {
                 // インスタンス移動なし
+                // サムネイル変更
+                if(user.ThumbnailURL!=data.ThumbnailURL)
+                {
+                    user.ThumbnailURL = data.ThumbnailURL;
+                    OnUpdateUser?.Invoke(user);
+                }
             }
             else
             {
@@ -71,22 +85,29 @@ namespace VRChatFriends.Entity
         }
         public async Task UpdateOfflineUser(List<UserData> onlineUser, Action<List<UserData>, List<LocationData>> result = null)
         {
-            Console.WriteLine("Update Offline User");
-            await Task.Run(() =>
+            Debug.Log("Update Offline User");
+            var keys = UserDataList.Keys.ToArray();
+            var values = UserDataList.Values.ToArray();
+            for (int i = 0; i<UserDataList.Count;i++)
             {
-                for(int i = 0; i<UserDataList.Count;i++)
+                UserData a = null;
+                for(int j=0;j<onlineUser.Count;j++)
                 {
-                    var a = onlineUser.FirstOrDefault(l => l.Id == UserDataList.ElementAt(i).Key);
-                    if(a==null)
+                    if(onlineUser[j].Id == keys[i])
                     {
-                        var u = UserDataList.ElementAt(i).Value;
-                        if (u.Location != "offline")
-                        {
-                            OnLostUser?.Invoke(u);
-                        }
+                        a = onlineUser[j];
+                        break;
                     }
                 }
-            }).ConfigureAwait(false);
+                if(a==null)
+                {
+                    var u = values[i];
+                    if (u.Location != "offline")
+                    {
+                        OnLostUser?.Invoke(u);
+                    }
+                }
+            }
             result?.Invoke(
                 UserDataList.Select(l => l.Value).ToList(),
                 LocationDataList.Select(l => l.Value).ToList());
