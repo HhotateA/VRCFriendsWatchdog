@@ -58,7 +58,13 @@ namespace VRChatFriends.Function
         public ObservableCollection<UserList> Users
         {
             get => users;
-            set => SetProperty(ref users, value);
+            set
+            {
+                Functions.DispatcheFunction(() =>
+                {
+                    SetProperty(ref users, value);
+                });
+            }
         }
         public bool IsInit = false;
         Action<LocationData> onFinishInit;
@@ -267,28 +273,38 @@ namespace VRChatFriends.Function
         {
             if (TimeStamp <= copyStamp || copyStamp == 0)
             {
+                Functions.DispatcheFunction(()=>{});
                 Name = data.Name;
                 Id = data.Id;
                 ThumbnailURL = data.ThumbnailURL;
-                Platform =  "Owner : " + data.OwnerName;
+                Platform =  "Owner : " + data.OwnerName + "     (Author: " + data.OutherName + " )";
                 Status = data.Status.ToString() + " <= " + data.ReleaseStatus;
-                Description = "by."+ data.OutherName + " : " + data.Description;
+                Description = data.Description;
                 if (data.Users.Count(l => l.Platform == "standalonewindows") != 0) Platform += "Windows";
                 if (data.Users.Count(l => l.Platform == "android") != 0) Platform += "Quest";
                 Tags = data.Tag;
                 Histry = data.Users.Count + " Friends <= " + data.Capacity;
 
                 TimeStamp = Functions.TimeStamp;
+                HistryDetail = new ObservableCollection<string>();
                 Users = new ObservableCollection<string>();
+                var usersList = new List<string>();
                 if(data.Id != "private" && data.Id != "offline")
                 {
                     for(int i=0;i<data.Users.Count;i++)
                     {
-                        Users.Add(data.Users[i].Name);
+                        Function.Debug.Log("aa" + data.Users[i].Name);
+                        usersList.Add(data.Users[i].Name);
                     }
+                    Users = new ObservableCollection<string>(usersList);
                     HistryDetail = new ObservableCollection<string>(data.UserHistry.Select(l=>l.Value.DetailData));
                 }
-                OnClickFavorite = new DelegateCommand(()=> { });
+
+                WatchTitle = "Detail";
+                OnClickFavorite = new DelegateCommand(() =>
+                {
+                    System.Diagnostics.Process.Start(Functions.IdToURLDetail(data.Id));
+                });
                 OnJoinClick = new DelegateCommand(() =>
                 {
                     System.Diagnostics.Process.Start(Functions.IdToURL(data.Id));
@@ -422,13 +438,25 @@ namespace VRChatFriends.Function
         public ObservableCollection<string> Users
         {
             get => users;
-            set => SetProperty(ref users, value);
+            set
+            {
+                Functions.DispatcheFunction(() =>
+                {
+                    SetProperty(ref users, value);
+                });
+            }
         }
         ObservableCollection<string> histryDetail;
         public ObservableCollection<string> HistryDetail
         {
             get => histryDetail;
-            set =>SetProperty(ref histryDetail, value);
+            set
+            {
+                Functions.DispatcheFunction(() =>
+                {
+                    SetProperty(ref histryDetail, value);
+                });
+            }
         }
 
         WeeksFootprint footprint = new WeeksFootprint(false);
@@ -450,6 +478,19 @@ namespace VRChatFriends.Function
         {
             get => onJoinClick;
             set => SetProperty(ref onJoinClick, value);
+        }
+        string watchTitle = "Watch";
+        public string WatchTitle
+        {
+            get => watchTitle;
+            set => SetProperty(ref watchTitle, value);
+        }
+        string joinTitle = "Join";
+
+        public string JoinTitle
+        {
+            get => joinTitle;
+            set => SetProperty(ref joinTitle, value);
         }
     }
 

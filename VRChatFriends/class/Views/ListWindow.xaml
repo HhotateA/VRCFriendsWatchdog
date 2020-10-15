@@ -25,7 +25,6 @@
                     <Button x:Name="logout" Content="Logout" Command="{Binding OnLogoutClick}" Height="30" HorizontalAlignment="Right" Width="50" Margin="0,0,70,0" />
                     <TextBox x:Name="KeywordBox"
                             FontSize="20"
-                            TextChanged="KeywordChange"
                             Text="{Binding FilterKeyword}" Width="200" Margin="-150,0,0,0" HorizontalAlignment="Center"/>
                     <Button x:Name="serch" Content="Search" Command="{Binding OnFilterKeywordChange}" Height="30" HorizontalAlignment="Center" Width="50" Margin="150,0,0,0" />
                     <ComboBox ItemsSource="{Binding SortTypes}"
@@ -92,8 +91,8 @@
                         <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Date}"/>
                         <TextBlock TextWrapping="Wrap" Text="{Binding DetailPanel.Histry}"/>
                         <StackPanel Margin="10" Orientation="Horizontal">
-                            <Button x:Name="Fav" Content="Watch" Command="{Binding DetailPanel.OnClickFavorite}" Height="30"  Width="50" Margin="10,0,0,0" HorizontalAlignment="Left"/>
-                            <Button x:Name="Join" Content="Join" Command="{Binding DetailPanel.OnJoinClick}" Height="30"  Width="50" Margin="30,0,0,0" HorizontalAlignment="Left"/>
+                            <Button x:Name="Fav" Content="{Binding DetailPanel.WatchTitle}" Command="{Binding DetailPanel.OnClickFavorite}" Height="30" Margin="10,0,0,0" HorizontalAlignment="Left" MinWidth="70"/>
+                            <Button x:Name="Join" Content="{Binding DetailPanel.JoinTitle}" Command="{Binding DetailPanel.OnJoinClick}" Height="30" Margin="30,0,0,0" HorizontalAlignment="Left" MinWidth="70"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

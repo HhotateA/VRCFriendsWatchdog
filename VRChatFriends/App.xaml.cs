@@ -40,12 +40,9 @@ namespace VRChatFriends
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 var v = new ListWindow();
+                Functions.ActiveWindow = v;
                 var vm = new ListWindowViewModel();
                 v.DataContext = vm;
-                v.OnKeywordChange += (e) =>
-                {
-                    vm.ListFilterUpdate();
-                };
                 vm.OpenLoginDialog += (() =>
                 {
                     OpenLoginWindow();
@@ -58,7 +55,6 @@ namespace VRChatFriends
                 });
                 v.AppShutdown += AppShutdown;
                 v.Show();
-                Functions.ActiveWindow = v;
             }));
         }
         public void OpenLoginWindow()
@@ -67,6 +63,7 @@ namespace VRChatFriends
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 var v = new Login();
+                Functions.ActiveWindow = v;
                 var vm = new LoginViewModel();
                 v.DataContext = vm;
                 v.OnPasswordChange += (e) =>
@@ -79,7 +76,6 @@ namespace VRChatFriends
                     CloseActiveWindow(v);
                 });
                 v.Show();
-                Functions.ActiveWindow = v;
             }));
         }
         public void CloseActiveWindow(Window window)

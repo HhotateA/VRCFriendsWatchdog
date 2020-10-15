@@ -33,29 +33,24 @@ namespace VRChatFriends.Views
             AppShutdown?.Invoke();
         }
         public Action AppShutdown { get; set; }
-        private void KeywordChange(object sender, RoutedEventArgs e)
-        {
-            OnKeywordChange?.Invoke(KeywordBox.Text);
-        }
-        public Action<string> OnKeywordChange { get; set; }
         private void ListWindow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             var data = this.FindName("UpdateData") as Border;
             var list = this.FindName("LocationList") as ListBox;
             var log = this.FindName("Log") as TextBox;
-            if (e.NewSize.Height>1000)
+            if (e.NewSize.Height> ConfigData.DataWindowHeight)
             {
                 data.Visibility = Visibility.Visible;
                 data.Height = Double.NaN;
                 var size = e.NewSize.Height - (1250 - 350);
-                list.Height = Math.Max(size, 100);
+                list.Height = Math.Max(size, ConfigData.ListMinHeight);
             }
             else
             {
                 data.Visibility = Visibility.Hidden;
                 data.Height = 0;
                 var size = e.NewSize.Height - (1250 - 450);
-                list.Height = Math.Max(size, 100);
+                list.Height = Math.Max(size, ConfigData.ListMinHeight);
             }
             var logsize = e.NewSize.Width - (1400 - 100);
             log.Width = Math.Max(0,logsize);

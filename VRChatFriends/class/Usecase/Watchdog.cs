@@ -18,6 +18,7 @@ namespace VRChatFriends.Usecase
         public void ReloadInstance(Action onFinish=null)
         {
             api.ReloadInstance();
+            data.ReloadInstance();
             log.ReloadInstance();
             onFinish?.Invoke();
         }

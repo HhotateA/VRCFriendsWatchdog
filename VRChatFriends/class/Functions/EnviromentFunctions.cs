@@ -146,6 +146,11 @@ namespace VRChatFriends.Function
             if(a.Length<2) return "https://www.vrchat.com/home";
             return "https://www.vrchat.com/home/launch?worldId=" + a[0] + "&instanceId=" + a[1];
         }
+        public static string IdToURLDetail(string id)
+        {
+            var a = id.Split(':');
+            return "https://www.vrchat.com/home/world/" + a[0];
+        }
     }
     public enum FavoriteType
     {

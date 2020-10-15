@@ -30,8 +30,6 @@ namespace VRChatFriends.Entity
 
         public void ReloadInstance()
         {
-            timer.Stop();
-            instance = new LogSaver();
         }
         UsersSaveData savedUsers;
         Timer timer;

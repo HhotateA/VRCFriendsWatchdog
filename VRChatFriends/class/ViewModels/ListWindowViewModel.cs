@@ -70,9 +70,16 @@ namespace VRChatFriends.ViewModels
                 if (isReloading == false)
                 {
                     isReloading = true;
-                    watchdog.InitializeUserList(() =>
+                    watchdog.StopWatchdog();
+                    watchdog.ReloadInstance(() =>
                     {
-                        isReloading = false;
+                        Locations = new List<LocationList>();
+                        FilterdLocationList = new ObservableCollection<LocationList>();
+                        watchdog.InitializeUserList(() =>
+                        {
+                            isReloading = false;
+                            watchdog.StartWatchdog();
+                        });
                     });
                 }
             });
@@ -117,13 +124,29 @@ namespace VRChatFriends.ViewModels
             }
         }
 
+        void SafeAction(Action e)
+        {
+            // Dispatcherスレッドで実行しないとバグることがあるので特殊処理
+            if (SortFilter == SortType.None)
+            {
+                Functions.DispatcheFunction(() =>
+                {
+                    e?.Invoke();
+                });
+            }
+            else
+            {
+                e?.Invoke();
+            }
+        }
+
         public void ListFilterUpdate()
         {
             FilterdLocationList = ListFilterilter(locations, SortFilter);
         }
 
-        ObservableCollection<LocationList> locations = new ObservableCollection<LocationList>();
-        public ObservableCollection<LocationList> Locations
+        List<LocationList> locations = new List<LocationList>();
+        public List<LocationList> Locations
         {
             get
             {
@@ -136,7 +159,7 @@ namespace VRChatFriends.ViewModels
             }
         }
 
-        void CountUser(ObservableCollection<LocationList> locations)
+        void CountUser(List<LocationList> locations)
         {
             UserCount = "Get : " + locations.Sum(l => l.Users.Count);
             OnlineCount = "Online : " + locations.Where(l => l.Location.Id != "offline").Sum(l => l.Users.Count);
@@ -221,7 +244,13 @@ namespace VRChatFriends.ViewModels
         public ObservableCollection<LocationList> FilterdLocationList
         {
             get => filterdLocationList;
-            set => SetProperty(ref filterdLocationList,value);
+            set
+            {
+                Functions.DispatcheFunction(()=>
+                {
+                    SetProperty(ref filterdLocationList, value);
+                });
+            }
         }
         DetailPanelTemplate detailPanel = new DetailPanelTemplate();
         public DetailPanelTemplate DetailPanel
@@ -263,7 +292,7 @@ namespace VRChatFriends.ViewModels
                         DetailPanel.SetData(location, Functions.TimeStamp);
                         DetailPanel.Footprint = new WeeksFootprint(false);
                     });
-                    Locations.Add(locationPanel);
+                    SafeAction(()=> Locations.Add(locationPanel));
                     if (location.Id == "offline" || location.Id == "private")
                     {
                         locationPanel.FinishInit(location);
@@ -283,6 +312,7 @@ namespace VRChatFriends.ViewModels
                         var copyStamp = Functions.TimeStamp;
                         DetailPanel.SetData(user, copyStamp);
                         DetailPanel.SetData(userPanel, copyStamp);
+                        DetailPanel.WatchTitle = userPanel.Fav == FavoriteType.Local ? "UnWatch" : "Watch";
                         watchdog.UserDetail(user.Id, (u) =>
                         {
                             DetailPanel.SetData(u, copyStamp);
@@ -293,6 +323,7 @@ namespace VRChatFriends.ViewModels
                             favoriteList.ToggleFavorite(user.Id, (e) =>
                             {
                                 userPanel.Fav = favoriteList.GetUserFavorite(user.Id);
+                                DetailPanel.WatchTitle = userPanel.Fav == FavoriteType.Local ? "UnWatch" : "Watch";
                                 ListFilterUpdate();
                             }
                         ));
@@ -301,12 +332,12 @@ namespace VRChatFriends.ViewModels
                 }
                 else
                 {
-                    oldLocationPanel.Users.Remove(userPanel);
+                    SafeAction(() => oldLocationPanel.Users.Remove(userPanel));
                 }
                 userPanel.UpdateTimeStamp();
                 // アバターサムネイルの変更検知のため，ここでもサムネイル取得
                 userPanel.ThumbnailURL = user.ThumbnailURL;
-                locationPanel.Users.Insert(0, userPanel);
+                SafeAction(() => locationPanel.Users.Insert(0, userPanel));
                 locationPanel.AddOnFinishInit((l) =>
                 {
                     LogText = (user.Name + " join to " + l.Name);
@@ -324,10 +355,9 @@ namespace VRChatFriends.ViewModels
 
                 locationPanel.UpdateTimeStamp();
                 // リスト上位に追加
-                Locations = new ObservableCollection<LocationList>(
-                    Locations.OrderBy(l => -l.TimeStamp)
+                Locations = Locations.OrderBy(l => -l.TimeStamp)
                     .Where(l => l.Users.Count != 0)
-                    .ToList());
+                    .ToList();
             }
             // リストをフィルター
             if (user.Location != "offline" && user.Location != "private")
@@ -338,6 +368,14 @@ namespace VRChatFriends.ViewModels
         void OnLostUser (UserData user)
         {
             Debug.Log(user.Id + " is logout");
+            LocationList locationPanel = null;
+            UserList userPanel = null;
+            SerchLocation(user.Id,ref locationPanel,ref userPanel);
+            if (locationPanel != null && userPanel != null)
+            {
+                locationPanel.Users.Remove(userPanel);
+                SafeAction(()=>OfflineLocation()?.Users.Insert(0, userPanel));
+            }
         }
 
         void OnUpdateUser (UserData user)
@@ -367,50 +405,43 @@ namespace VRChatFriends.ViewModels
             }
         }
 
-        ObservableCollection<LocationList> ListFilterilter(ObservableCollection<LocationList> origin, SortType sort)
+        ObservableCollection<LocationList> ListFilterilter(List<LocationList> origin, SortType sort)
         {
             Debug.Log("List Update => Sorting by : " + sort);
-            if (sort == SortType.None) return origin;
+            if (sort == SortType.None) return new ObservableCollection<LocationList>(origin);
             try
             {
                 var clone = new List<LocationList>();
                 for(int i = 0; i<origin.Count;i++)
                 {
-                    if(origin[i]!=null)
+                    var llist = new LocationList(origin[i]);
+                    llist.Users.Clear();
+                    for (int j = 0; j < origin[i].Users.Count; j++)
                     {
-                        var llist = new LocationList(origin[i]);
-                        llist.Users.Clear();
-                        for (int j = 0; j < origin[i].Users.Count; j++)
+                        if(String.IsNullOrWhiteSpace(FilterKeyword) || origin[i].Users[j].user.Name.ToUpper().Contains(FilterKeyword.ToUpper()))
                         {
-                            if(origin[i].Users!=null)
-                            {
-                                var uList = new UserList(origin[i].Users[j]);
-                                llist.Users.Add(uList);
-                            }
+                            var uList = new UserList(origin[i].Users[j]);
+                            llist.Users.Add(uList);
                         }
-                        clone.Add(new LocationList(llist));
                     }
-                }
-                if(!String.IsNullOrWhiteSpace(FilterKeyword))
-                {
-                    for (int i = 0; i < clone.Count; i++)
-                    {
-                        var users = clone[i].Users.
-                            Where(l => l.User.Name.ToUpper().Contains(FilterKeyword.ToUpper())).
-                            ToList();
-                        clone[i].Users = new ObservableCollection<UserList>(users);
 
-                        if (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private")
-                        {
-                            clone[i].SortNumber = int.MaxValue / 2;
-                        }
-                    }
-                    clone = clone.Where(l => l.Users.Count != 0).ToList();
-                    for(int j=0;j<clone.Count;j++)
+                    if (llist.Users.Count > 0)
                     {
-                        clone[j].SortNumber = clone[j].Users.Count == 0 ?
-                            int.MaxValue / 2 :
-                            clone[j].Users.Max(l => l.TimeStamp);
+                        clone.Add(new LocationList(llist));
+
+                        if (clone.Last().Location.Id == "private")
+                        {
+                            clone.Last().SortNumber = int.MaxValue / 4;
+                        }
+                        else
+                        if (clone.Last().Location.Id == "offline")
+                        {
+                            clone.Last().SortNumber = int.MaxValue / 3;
+                        }
+                        else
+                        {
+                            clone.Last().Users.Max(l => l.TimeStamp);
+                        }
                     }
                 }
 
@@ -420,23 +451,13 @@ namespace VRChatFriends.ViewModels
                         {
                             for (int i = 0; i < clone.Count; i++)
                             {
-                                if (clone[i].Location.Id == "private")
+                                if (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private" || clone[i].Users.Count == 0)
                                 {
-                                    clone[i].SortNumber = int.MaxValue / 4;
-                                }
-                                else
-                                if (clone[i].Location.Id == "offline")
-                                {
-                                    clone[i].SortNumber = int.MaxValue / 3;
-                                }
-                                else
-                                if (clone[i].Users.Count == 0)
-                                {
-                                    clone[i].SortNumber = int.MaxValue / 2;
+                                    clone[i].SortNumber += int.MaxValue / 2;
                                 }
                                 else
                                 {
-                                    clone[i].SortNumber = -clone[i].Users?.Count ?? int.MaxValue / 2;
+                                    clone[i].SortNumber += -clone[i].Users?.Count ?? int.MaxValue / 2;
                                 }
                             };
                             break;
@@ -449,23 +470,13 @@ namespace VRChatFriends.ViewModels
                         {
                             for (int i = 0; i < clone.Count; i++)
                             {
-                                if (clone[i].Location.Id == "private")
+                                if (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private" || clone[i].Users.Count == 0)
                                 {
-                                    clone[i].SortNumber = int.MaxValue / 4;
-                                }
-                                else
-                                if (clone[i].Location.Id == "offline")
-                                {
-                                    clone[i].SortNumber = int.MaxValue / 3;
-                                }
-                                else
-                                if (clone[i].Users.Count == 0)
-                                {
-                                    clone[i].SortNumber = int.MaxValue / 2;
+                                    clone[i].SortNumber += int.MaxValue / 2;
                                 }
                                 else
                                 {
-                                    clone[i].SortNumber = -clone[i].Users?.Max(u => u.TimeStamp) ?? int.MaxValue / 2;
+                                    clone[i].SortNumber += -clone[i].Users?.Max(u => u.TimeStamp) ?? int.MaxValue / 2;
                                 }
                             };
                             break;
@@ -474,23 +485,13 @@ namespace VRChatFriends.ViewModels
                         {
                             for(int i = 0; i<clone.Count; i++)
                             {
-                                if (clone[i].Location.Id == "private")
+                                if (clone[i].Location.Id == "offline" || clone[i].Location.Id == "private" || clone[i].Users.Count == 0)
                                 {
-                                    clone[i].SortNumber = int.MaxValue / 4;
-                                }
-                                else
-                                if (clone[i].Location.Id == "offline")
-                                {
-                                    clone[i].SortNumber = int.MaxValue / 3;
-                                }
-                                else
-                                if (clone[i].Users.Count == 0)
-                                {
-                                    clone[i].SortNumber = int.MaxValue / 2;
+                                    clone[i].SortNumber += int.MaxValue / 2;
                                 }
                                 else
                                 {
-                                    clone[i].SortNumber = clone[i].Users?.Sum(u => -(int)u.Fav) ?? int.MaxValue / 2;
+                                    clone[i].SortNumber += clone[i].Users?.Sum(u => -(int)u.Fav) ?? int.MaxValue / 2;
                                 }
                             }
                             break;
@@ -505,6 +506,10 @@ namespace VRChatFriends.ViewModels
                         u.RemoveRange(ConfigData.MaxUserCell, u.Count - ConfigData.MaxUserCell);
                         clone[i].Users = new ObservableCollection<UserList>(u);
                     }
+                    if (clone[i].Users.Count < 1)
+                    {
+                        clone.RemoveAt(i);
+                    }
                 }
                 return new ObservableCollection<LocationList>(clone.OrderBy(l => l.SortNumber));
             }
@@ -512,7 +517,7 @@ namespace VRChatFriends.ViewModels
             {
                 Debug.Log(e.ToString());
                 Debug.Log("Sorting Erorr... Please Relogin");
-                throw;
+                return new ObservableCollection<LocationList>(origin);
             }
         }
 
@@ -569,8 +574,18 @@ namespace VRChatFriends.ViewModels
                     }
                 }
             }
-            location = null;
-            user = null;
+        }
+        LocationList OfflineLocation()
+        {
+            for(int i=0;i<Locations.Count;i++)
+            {
+                if(Locations[i].location.Id == "offline")
+                {
+                    return Locations[i];
+                }
+            }
+
+            return null;
         }
     }
 }

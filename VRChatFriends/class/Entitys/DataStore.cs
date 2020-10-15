@@ -21,6 +21,12 @@ namespace VRChatFriends.Entity
         public Action<LocationData> OnInitializeLocation { get; set; }
         public Action<UserData> OnInitializeUser { get; set; }
 
+        public void ReloadInstance()
+        {
+            LocationDataList = new Dictionary<string, LocationData>();
+            UserDataList = new Dictionary<string, UserData>();
+        }
+
         public void UpdateUser(UserData data)
         {
             UserData user;

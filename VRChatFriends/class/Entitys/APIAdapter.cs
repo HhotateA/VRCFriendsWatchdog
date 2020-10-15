@@ -33,7 +33,6 @@ namespace VRChatFriends.Entity
 
         public void ReloadInstance()
         {
-            instance = new APIAdapter();
             instance.Login();
         }
 

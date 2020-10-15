@@ -133,5 +133,15 @@ namespace VRChatFriends.Function
             get { return Properties.Settings.Default.Eula; }
             set { Properties.Settings.Default.Eula = value; }
         }
+        public static int ListMinHeight
+        {
+            get { return Properties.Settings.Default.ListMinHeight; }
+            set { Properties.Settings.Default.ListMinHeight = value; }
+        }
+        public static int DataWindowHeight
+        {
+            get { return Properties.Settings.Default.DataWindowHeight; }
+            set { Properties.Settings.Default.DataWindowHeight = value; }
+        }
     }
 }

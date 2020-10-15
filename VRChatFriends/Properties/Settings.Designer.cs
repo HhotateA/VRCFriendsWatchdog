@@ -204,5 +204,29 @@ namespace VRChatFriends.Properties {
                 this["Eula"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100")]
+        public int ListMinHeight {
+            get {
+                return ((int)(this["ListMinHeight"]));
+            }
+            set {
+                this["ListMinHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int DataWindowHeight {
+            get {
+                return ((int)(this["DataWindowHeight"]));
+            }
+            set {
+                this["DataWindowHeight"] = value;
+            }
+        }
     }
 }
